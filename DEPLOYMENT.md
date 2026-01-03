@@ -24,8 +24,21 @@ This project is set up to be deployed as two separate services on Render:
    - `CLOUDINARY_CLOUD_NAME`: Your Cloudinary Cloud Name.
    - `CLOUDINARY_API_KEY`: Your Cloudinary API Key.
    - `CLOUDINARY_API_SECRET`: Your Cloudinary API Secret.
+   - `ADMIN_USERNAME`: Desired username for the owner account.
+   - `ADMIN_EMAIL`: Desired email for the owner account.
+   - `ADMIN_PASSWORD`: Strong password for the owner account.
    - `FRONTEND_URL`: The URL of your deployed frontend (you will get this after deploying the frontend, e.g., `https://your-frontend.onrender.com`). *Initially, you can leave this blank or add it later.*
 6. Click **Create Web Service**.
+
+## 1.5. Initialize Admin User (Free Plan Method)
+Since the Free Plan doesn't allow Shell access, we will run the seed script as part of the server startup.
+
+1. Go to your **Backend Service** dashboard on Render.
+2. Click on **Settings**.
+3. Scroll down to **Start Command**.
+4. Change the command to: `node seedAdmin.js && node server.js`
+5. Click **Save Changes**.
+6. The service will automatically redeploy. Watch the **Logs** tab. You should see "Admin user created/updated successfully" followed by "Server running".
 
 ## 2. Deploying the Frontend
 

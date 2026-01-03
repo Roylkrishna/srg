@@ -57,7 +57,12 @@ exports.signup = async (req, res, next) => {
         const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '10m' });
         const { password: pass, ...rest } = newUser._doc;
 
-        res.cookie('access_token', token, { httpOnly: true })
+        res.cookie('access_token', token, {
+            httpOnly: true,
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 10 * 60 * 1000 // 10 minutes
+        })
             .status(201)
             .json({ success: true, user: rest, message: "User created successfully" });
     } catch (error) {
@@ -86,7 +91,12 @@ exports.login = async (req, res, next) => {
 
         const { password: pass, ...rest } = validUser._doc;
 
-        res.cookie('access_token', token, { httpOnly: true })
+        res.cookie('access_token', token, {
+            httpOnly: true,
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 10 * 60 * 1000 // 10 minutes
+        })
             .status(200)
             .json({ success: true, user: rest });
     } catch (error) {
