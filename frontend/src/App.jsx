@@ -1,0 +1,115 @@
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Shop from './pages/Shop';
+import ProductDetails from './pages/ProductDetails';
+import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ProductEdit from './pages/ProductEdit';
+import UserDetail from './pages/UserDetail';
+import Wishlist from './pages/Wishlist';
+
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import PrivateRoute from './components/PrivateRoute';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { checkAuth } from './redux/slices/authSlice';
+
+// Helper to scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
+const AuthWrapper = ({ children }) => {
+  const dispatch = useDispatch();
+  const { isAuthChecked } = useSelector(state => state.auth);
+
+  useEffect(() => {
+    dispatch(checkAuth());
+
+    // Listen for logout in other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === 'logout') {
+        dispatch({ type: 'auth/logout' });
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [dispatch]);
+
+  if (!isAuthChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
+
+  return children;
+};
+
+function App() {
+  return (
+    <Provider store={store}>
+      <BrowserRouter>
+        <AuthWrapper>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/edit-product/:id"
+              element={
+                <PrivateRoute>
+                  <ProductEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/user/:id"
+              element={
+                <PrivateRoute>
+                  <UserDetail />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </AuthWrapper>
+      </BrowserRouter>
+    </Provider>
+  );
+}
+
+export default App;
