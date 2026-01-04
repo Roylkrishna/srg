@@ -11,7 +11,7 @@ exports.createProduct = async (req, res, next) => {
 
         if (req.files && req.files.length > 0) {
             const imagePaths = req.files.map(file => {
-                return `/uploads/${file.filename}`;
+                return file.path; // Cloudinary returns the full URL in 'path'
             });
             productData.images = imagePaths;
         } else if (!productData.images) {
@@ -46,7 +46,7 @@ exports.updateProduct = async (req, res, next) => {
 
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => {
-                return `/uploads/${file.filename}`;
+                return file.path; // Cloudinary returns the full URL in 'path'
             });
 
             // If replacing, we might just set images. 
