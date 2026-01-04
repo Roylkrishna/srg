@@ -10,9 +10,19 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'shree-rama-gift-center',
-        allowed_formats: ['jpg', 'png', 'jpeg'],
+    params: async (req, file) => {
+        let folder = 'shree-rama-gift-center/others';
+
+        if (file.fieldname === 'profilePicture') {
+            folder = 'shree-rama-gift-center/users';
+        } else if (file.fieldname === 'images') {
+            folder = 'shree-rama-gift-center/products';
+        }
+
+        return {
+            folder: folder,
+            allowed_formats: ['jpg', 'png', 'jpeg'],
+        };
     },
 });
 
