@@ -130,6 +130,10 @@ exports.checkAuth = async (req, res, next) => {
 };
 
 exports.logout = (req, res) => {
-    res.clearCookie('access_token').status(200).json({ success: true, message: 'Logged out successfully' });
+    res.clearCookie('access_token', {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+        secure: process.env.NODE_ENV === 'production'
+    }).status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
