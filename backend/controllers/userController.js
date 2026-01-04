@@ -23,12 +23,9 @@ exports.updateProfile = async (req, res, next) => {
             }
         };
 
-        // Handle File Upload (Local)
+        // Handle File Upload (Cloudinary)
         if (req.file) {
-            // Construct URL
-            const protocol = req.protocol;
-            const host = req.get('host');
-            updateData.$set.profilePicture = `${protocol}://${host}/uploads/${req.file.filename}`;
+            updateData.$set.profilePicture = req.file.path;
         }
 
         const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
