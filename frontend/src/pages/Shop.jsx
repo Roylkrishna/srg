@@ -1,19 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 import { Filter, ChevronDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/slices/productSlice';
+import { fetchAllCategories } from '../redux/slices/categorySlice';
 
 const Shop = () => {
     const dispatch = useDispatch();
     const { items: products, loading, error } = useSelector((state) => state.products);
+    const { categories } = useSelector((state) => state.categories);
 
     useEffect(() => {
         dispatch(fetchProducts());
+        dispatch(fetchAllCategories());
     }, [dispatch]);
 
-    const [showFilters, setShowFilters] = React.useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    // State to track selected categories for filtering (client-side for now as productSlice fetches all)
+    const [selectedCategories, setSelectedCategories] = useState([]);
+
+    const handleCategoryChange = (categoryId) => {
+        setSelectedCategories(prev => {
+            if (prev.includes(categoryId)) {
+                return prev.filter(id => id !== categoryId);
+            } else {
+                return [...prev, categoryId];
+            }
+        });
+    };
+
+    // Filter products based on selected categories
+    const filteredProducts = selectedCategories.length > 0
+        ? products.filter(product => {
+            // Product category might be an object (populated) or string (ID)
+            const productCatId = product.category?._id || product.category;
+            return selectedCategories.includes(productCatId);
+        })
+        : products;
 
     return (
         <div className="min-h-screen bg-gift-cream">
@@ -50,14 +74,23 @@ const Shop = () => {
                             </h3>
 
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-900">Occasion</h4>
+                                <h4 className="font-medium text-gray-900">Category</h4>
                                 <div className="space-y-2">
-                                    {['Diwali', 'Raksha Bandhan', 'Wedding (Shadi)', 'Pooja Essentials', 'Corporate'].map(cat => (
-                                        <label key={cat} className="flex items-center gap-2">
-                                            <input type="checkbox" className="rounded border-gray-300 text-red-600 focus:ring-red-600" />
-                                            <span className="text-gray-600">{cat}</span>
-                                        </label>
-                                    ))}
+                                    {categories.length === 0 ? (
+                                        <p className="text-sm text-gray-400 italic">No categories found.</p>
+                                    ) : (
+                                        categories.map(cat => (
+                                            <label key={cat._id || cat.id} className="flex items-center gap-2 cursor-pointer hover:text-red-600 transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCategories.includes(cat._id || cat.id)}
+                                                    onChange={() => handleCategoryChange(cat._id || cat.id)}
+                                                    className="rounded border-gray-300 text-red-600 focus:ring-red-600"
+                                                />
+                                                <span className="text-gray-600">{cat.name}</span>
+                                            </label>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 
@@ -85,11 +118,11 @@ const Shop = () => {
                                 <p>Error loading products: {error}</p>
                                 <p className="text-sm mt-2">Make sure the backend is running!</p>
                             </div>
-                        ) : products.length === 0 ? (
+                        ) : filteredProducts.length === 0 ? (
                             <div className="text-center text-gray-500 py-12">No products found.</div>
                         ) : (
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                                {products.map(product => (
+                                {filteredProducts.map(product => (
                                     <ProductCard key={product._id || product.id} product={product} /> // Support both _id (mongo) and id (mock)
                                 ))}
                             </div>
