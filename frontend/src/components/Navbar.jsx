@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Search, User, Menu, X, Gift, LogOut, Shield, Edit, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../redux/slices/authSlice';
+import { searchProducts, clearSearchResults } from '../redux/slices/productSlice';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +13,10 @@ const Navbar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = React.useRef(null);
     const { user } = useSelector((state) => state.auth);
+    const { searchResults, searchLoading } = useSelector((state) => state.products);
+    const [searchQuery, setSearchQuery] = useState('');
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -37,6 +42,19 @@ const Navbar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Handle search logic
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery.length >= 2) {
+                dispatch(searchProducts(searchQuery));
+            } else {
+                dispatch(clearSearchResults());
+            }
+        }, 300); // Debounce search
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, dispatch]);
+
     return (
         <nav className={cn(
             "fixed w-full z-50 transition-all duration-500",
@@ -56,29 +74,80 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-10">
-                        {['Home', 'Shop', 'About Us', 'Contact'].map((item) => (
-                            <Link
-                                key={item}
-                                to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '')}`}
-                                className="text-gray-600 hover:text-royal-red font-medium transition-all duration-300 relative group text-sm uppercase tracking-widest"
-                            >
-                                {item}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-royal-red transition-all duration-300 group-hover:w-full"></span>
-                            </Link>
-                        ))}
-                    </div>
 
                     {/* Icons */}
                     <div className="hidden md:flex items-center gap-8">
-                        <div className="relative group">
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="w-0 group-hover:w-40 focus:w-40 transition-all duration-500 border-none bg-gray-100/50 rounded-full outline-none text-xs px-0 group-hover:px-4 focus:px-4 py-2 text-gray-700 placeholder-gray-400 backdrop-blur-sm"
-                            />
-                            <Search className="text-gray-600 group-hover:text-royal-red cursor-pointer transition-colors" size={18} />
+                        <div className="relative group/search">
+                            <div className="flex items-center gap-2 bg-gray-100/50 rounded-full px-4 py-2 backdrop-blur-sm border border-transparent focus-within:border-royal-red/30 focus-within:bg-white transition-all w-48 lg:w-64 group">
+                                <Search className="text-gray-500 group-focus-within:text-royal-red transition-colors" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search treasures..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-xs text-gray-700 placeholder-gray-400 w-full"
+                                />
+                            </div>
+
+                            {/* Search Results Dropdown */}
+                            <AnimatePresence>
+                                {searchQuery.length >= 2 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full mt-4 -right-20 w-[400px] glass-card rounded-2xl shadow-premium overflow-hidden z-[60]"
+                                    >
+                                        <div className="p-4 border-b border-gray-100/50 bg-gray-50/50 flex justify-between items-center">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Search Results</span>
+                                            <button
+                                                onClick={() => {
+                                                    setSearchQuery('');
+                                                    navigate(`/shop?search=${searchQuery}`);
+                                                }}
+                                                className="text-[10px] font-black uppercase tracking-widest text-royal-red hover:underline"
+                                            >
+                                                View All
+                                            </button>
+                                        </div>
+                                        <div className="max-h-[400px] overflow-y-auto">
+                                            {searchLoading ? (
+                                                <div className="p-10 flex justify-center">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-royal-red"></div>
+                                                </div>
+                                            ) : searchResults.length > 0 ? (
+                                                <div className="divide-y divide-gray-50">
+                                                    {searchResults.map(product => (
+                                                        <Link
+                                                            key={product._id}
+                                                            to={`/product/${product._id}`}
+                                                            onClick={() => setSearchQuery('')}
+                                                            className="flex items-center gap-4 p-4 hover:bg-royal-red/5 transition-colors group"
+                                                        >
+                                                            <div className="h-12 w-12 rounded-xl bg-gift-cream overflow-hidden flex-shrink-0">
+                                                                <img
+                                                                    src={product.images?.[0] || product.image}
+                                                                    alt={product.name}
+                                                                    className="w-full h-full object-contain p-1"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-bold text-gray-900 truncate group-hover:text-royal-red transition-colors">{product.name}</p>
+                                                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{product.category?.name || 'Handcrafted'}</p>
+                                                            </div>
+                                                            <div className="text-sm font-black text-gray-900">₹{product.price}</div>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="p-10 text-center">
+                                                    <p className="text-xs text-gray-400 font-serif italic">No treasures found for "{searchQuery}"</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         {user ? (
@@ -161,18 +230,6 @@ const Navbar = () => {
                                 </div>
                             </div>
                         )}
-                        <div className="flex flex-col gap-4 px-2">
-                            {['Home', 'Shop', 'About', 'Contact'].map((item) => (
-                                <Link
-                                    key={item}
-                                    to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-lg font-serif font-bold text-gray-800 hover:text-royal-red transition-colors"
-                                >
-                                    {item}
-                                </Link>
-                            ))}
-                        </div>
 
                         <div className="pt-6 border-t border-gray-100/50 flex flex-col gap-4">
                             {!user ? (

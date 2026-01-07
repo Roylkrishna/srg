@@ -10,6 +10,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProductEdit from './pages/ProductEdit';
 import UserDetail from './pages/UserDetail';
 import Wishlist from './pages/Wishlist';
+import AboutUs from './pages/AboutUs';
+import Contact from './pages/Contact';
+
+import Footer from './components/Footer';
 
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
@@ -69,6 +73,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
 
@@ -106,6 +112,7 @@ function App() {
               }
             />
           </Routes>
+          <Footer />
         </AuthWrapper>
       </BrowserRouter>
     </Provider>

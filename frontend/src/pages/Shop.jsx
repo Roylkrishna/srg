@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, ChevronDown, Sparkles, Star } from 'lucide-react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '../redux/slices/productSlice';
-import { fetchAllCategories } from '../redux/slices/categorySlice';
-import { fetchStats } from '../redux/slices/statsSlice';
-import Navbar from '../components/Navbar';
-import ProductCard from '../components/ProductCard';
+import { useLocation } from 'react-router-dom';
 
 const Shop = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const searchQuery = searchParams.get('search') || '';
+
     const { items: products, loading, error } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.categories);
     const { stats } = useSelector((state) => state.stats);
 
     useEffect(() => {
-        dispatch(fetchProducts());
+        dispatch(fetchProducts({ search: searchQuery }));
         dispatch(fetchAllCategories());
         dispatch(fetchStats());
-    }, [dispatch]);
+    }, [dispatch, searchQuery]);
 
     const [showFilters, setShowFilters] = useState(false);
     const [selectedCategories, setSelectedCategories] = useState([]);
@@ -33,6 +29,7 @@ const Shop = () => {
         });
     };
 
+    // Filter by category locally (search is already filtered by backend)
     const filteredProducts = selectedCategories.length > 0
         ? products.filter(product => {
             const productCatId = product.category?._id || product.category;

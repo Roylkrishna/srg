@@ -49,15 +49,30 @@ export const updateProduct = createAsyncThunk('products/update', async ({ id, da
     }
 });
 
+export const searchProducts = createAsyncThunk('products/search', async (query, thunkAPI) => {
+    try {
+        const response = await api.get('/products', { params: { search: query, select: 'name,price,image,images,category' } });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 const productSlice = createSlice({
     name: 'products',
     initialState: {
         items: [],
+        searchResults: [],
         productDetails: null,
         loading: false,
+        searchLoading: false,
         error: null,
     },
-    reducers: {},
+    reducers: {
+        clearSearchResults: (state) => {
+            state.searchResults = [];
+        }
+    },
     extraReducers: (builder) => {
         builder
             // Fetch All
@@ -104,8 +119,21 @@ const productSlice = createSlice({
                 if (state.productDetails && state.productDetails._id === action.payload._id) {
                     state.productDetails = action.payload;
                 }
+            })
+            // Search
+            .addCase(searchProducts.pending, (state) => {
+                state.searchLoading = true;
+            })
+            .addCase(searchProducts.fulfilled, (state, action) => {
+                state.searchLoading = false;
+                state.searchResults = action.payload;
+            })
+            .addCase(searchProducts.rejected, (state) => {
+                state.searchLoading = false;
             });
     }
 });
+
+export const { clearSearchResults } = productSlice.actions;
 
 export default productSlice.reducer;

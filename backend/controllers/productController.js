@@ -146,23 +146,33 @@ exports.getProduct = async (req, res, next) => {
 
 exports.getAllProducts = async (req, res, next) => {
     try {
-        let query = Product.find();
+        const { search, select } = req.query;
+        let filter = {};
 
-        if (req.query.select) {
-            const fields = req.query.select.split(',').join(' ');
-            query = query.select(fields);
+        if (search) {
+            // 1. Find categories that match the search term
+            const Category = require('../models/Category');
+            const matchingCategories = await Category.find({
+                name: { $regex: search, $options: 'i' }
+            }).select('_id');
+            const categoryIds = matchingCategories.map(cat => cat._id);
+
+            // 2. Build filter for product name, description, and category
+            filter = {
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                    { category: { $in: categoryIds } }
+                ]
+            };
         }
 
-        // Always populate category and lastEditedBy unless specifically excluded? 
-        // For simplicity, let's keep populating them as they are useful. 
-        // Mongoose ignores populate if field is excluded in select?
-        // Actually if strict select is used, we must ensure populated fields are selected to be populated.
-        // If select is present, we rely on user strictly asking for what they want.
-        // But for safety, let's just chain populate. If field is not in select, populate is no-op or handled.
-        // Wait, if I do Model.find().select('name').populate('category'), it might try to populate category but category path is not in result if not selected?
-        // No, typically you must select the field to populate it.
-        // If I select 'name category', then populate 'category' works.
-        // If I select 'name', populate 'category' is ignored or returns nothing.
+        let query = Product.find(filter);
+
+        if (select) {
+            const fields = select.split(',').join(' ');
+            query = query.select(fields);
+        }
 
         query = query.populate('category').populate('lastEditedBy', 'firstName lastName');
 
