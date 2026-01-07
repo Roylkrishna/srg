@@ -4,6 +4,7 @@ import productReducer from './slices/productSlice';
 import userReducer from './slices/userSlice';
 import categoryReducer from './slices/categorySlice';
 import bannerReducer from './slices/bannerSlice';
+import statsReducer from './slices/statsSlice';
 
 export const store = configureStore({
     reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
         user: userReducer,
         categories: categoryReducer,
         banners: bannerReducer,
+        stats: statsReducer,
     },
 });

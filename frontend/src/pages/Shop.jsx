@@ -4,6 +4,7 @@ import { Filter, ChevronDown, Sparkles, Star } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/slices/productSlice';
 import { fetchAllCategories } from '../redux/slices/categorySlice';
+import { fetchStats } from '../redux/slices/statsSlice';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
 
@@ -11,10 +12,12 @@ const Shop = () => {
     const dispatch = useDispatch();
     const { items: products, loading, error } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.categories);
+    const { stats } = useSelector((state) => state.stats);
 
     useEffect(() => {
         dispatch(fetchProducts());
         dispatch(fetchAllCategories());
+        dispatch(fetchStats());
     }, [dispatch]);
 
     const [showFilters, setShowFilters] = useState(false);
@@ -93,24 +96,31 @@ const Shop = () => {
                                             {categories.length === 0 ? (
                                                 <p className="text-xs text-gray-400 italic">No categories found.</p>
                                             ) : (
-                                                categories.map(cat => (
-                                                    <label key={cat._id || cat.id} className="flex items-center group cursor-pointer">
-                                                        <div className="relative flex items-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedCategories.includes(cat._id || cat.id)}
-                                                                onChange={() => handleCategoryChange(cat._id || cat.id)}
-                                                                className="peer appearance-none h-5 w-5 border-2 border-gray-200 rounded-lg checked:bg-royal-red checked:border-royal-red transition-all cursor-pointer"
-                                                            />
-                                                            <div className="absolute opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white pointer-events-none">
-                                                                <Star size={10} fill="currentColor" />
+                                                categories.map(cat => {
+                                                    const catId = cat._id || cat.id;
+                                                    const count = stats?.categoryStats?.find(s => s._id?.toString() === catId?.toString())?.count || 0;
+                                                    return (
+                                                        <label key={catId} className="flex items-center group cursor-pointer justify-between">
+                                                            <div className="flex items-center">
+                                                                <div className="relative flex items-center">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedCategories.includes(catId)}
+                                                                        onChange={() => handleCategoryChange(catId)}
+                                                                        className="peer appearance-none h-5 w-5 border-2 border-gray-200 rounded-lg checked:bg-royal-red checked:border-royal-red transition-all cursor-pointer"
+                                                                    />
+                                                                    <div className="absolute opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white pointer-events-none">
+                                                                        <Star size={10} fill="currentColor" />
+                                                                    </div>
+                                                                </div>
+                                                                <span className="ml-3 text-sm font-medium text-gray-600 group-hover:text-royal-red transition-colors capitalize">
+                                                                    {cat.name}
+                                                                </span>
                                                             </div>
-                                                        </div>
-                                                        <span className="ml-3 text-sm font-medium text-gray-600 group-hover:text-royal-red transition-colors capitalize">
-                                                            {cat.name}
-                                                        </span>
-                                                    </label>
-                                                ))
+                                                            <span className="text-[10px] font-bold text-gray-400 group-hover:text-royal-red transition-colors">({count})</span>
+                                                        </label>
+                                                    );
+                                                })
                                             )}
                                         </div>
                                     </div>

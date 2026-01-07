@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 const Hero = ({ banners = [] }) => {
+    const { stats } = useSelector((state) => state.stats);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
@@ -123,12 +125,12 @@ const Hero = ({ banners = [] }) => {
 
                     <div className="grid grid-cols-2 gap-8 md:gap-12">
                         <div className="p-8 bg-gift-cream rounded-3xl border border-royal-gold/10 space-y-2 group hover:bg-white hover:shadow-xl transition-all duration-500">
-                            <p className="text-5xl font-serif font-black text-gray-900 group-hover:text-royal-red transition-colors">15K+</p>
+                            <p className="text-5xl font-serif font-black text-gray-900 group-hover:text-royal-red transition-colors">{stats.patrons || 0}+</p>
                             <p className="text-sm uppercase tracking-widest font-bold text-gray-400">Happy Patrons</p>
                             <p className="text-xs text-gray-500 leading-relaxed pt-2">Spreading joy across the country through our exclusive collections.</p>
                         </div>
                         <div className="p-8 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-2 group hover:shadow-xl transition-all duration-500">
-                            <p className="text-5xl font-serif font-black text-royal-red">2K+</p>
+                            <p className="text-5xl font-serif font-black text-royal-red">{stats.curations || 0}+</p>
                             <p className="text-sm uppercase tracking-widest font-bold text-gray-400">Unique Curations</p>
                             <p className="text-xs text-gray-500 leading-relaxed pt-2">Every piece is hand-selected and verified for royal quality.</p>
                         </div>
