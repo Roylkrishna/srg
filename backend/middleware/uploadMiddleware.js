@@ -3,7 +3,7 @@ const { storage } = require('../config/cloudinaryConfig');
 
 const upload = multer({
     storage,
-    limits: { fileSize: 500 * 1024 }, // 500KB limit
+    limits: { fileSize: 1024 * 1024 }, // 1MB limit
 });
 
 module.exports = upload;

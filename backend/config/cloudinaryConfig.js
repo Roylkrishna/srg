@@ -17,6 +17,8 @@ const storage = new CloudinaryStorage({
             folder = 'shree-rama-gift-center/users';
         } else if (file.fieldname === 'images') {
             folder = 'shree-rama-gift-center/products';
+        } else if (file.fieldname === 'image') {
+            folder = 'shree-rama-gift-center/banners';
         }
 
         return {

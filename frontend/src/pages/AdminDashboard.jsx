@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, Users, BarChart3, Plus, Search, Edit, Trash2, Check, X as XIcon, Gift, User as UserIcon, LogOut, ExternalLink, Clock, UserPlus, ShieldAlert, ShieldCheck, UserX, Info, Tags, Trash } from 'lucide-react';
+import { LayoutDashboard, Package, Users, BarChart3, Plus, Search, Edit, Trash2, Check, X as XIcon, Gift, User as UserIcon, LogOut, ExternalLink, Clock, UserPlus, ShieldAlert, ShieldCheck, UserX, Info, Tags, Trash, Image as ImageIcon, Layout } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, deleteProduct } from '../redux/slices/productSlice';
 import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus } from '../redux/slices/userSlice';
 import { fetchAllCategories, createCategory as addNewCategory, deleteCategory as removeCategory } from '../redux/slices/categorySlice';
+import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner } from '../redux/slices/bannerSlice';
 import { logoutUser } from '../redux/slices/authSlice';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -14,11 +15,13 @@ const AdminDashboard = () => {
     const { items: products, loading } = useSelector((state) => state.products);
     const { users, loading: userLoading } = useSelector((state) => state.user);
     const { categories, loading: categoryLoading } = useSelector((state) => state.categories);
+    const { banners, loading: bannerLoading } = useSelector((state) => state.banners);
     const { user } = useSelector((state) => state.auth);
 
     // Form State
     const [isAddMode, setIsAddMode] = useState(false);
     const [isAddUserMode, setIsAddUserMode] = useState(false);
+    const [isAddBannerMode, setIsAddBannerMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const [newProduct, setNewProduct] = useState({
@@ -27,6 +30,11 @@ const AdminDashboard = () => {
     const [imageFiles, setImageFiles] = useState([]); // Store files for upload
 
     const [newCategoryName, setNewCategoryName] = useState('');
+
+    const [newBanner, setNewBanner] = useState({
+        title: '', description: '', link: '', order: 0
+    });
+    const [bannerFile, setBannerFile] = useState(null);
 
     const [newUserForm, setNewUserForm] = useState({
         firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager'
@@ -47,6 +55,8 @@ const AdminDashboard = () => {
             dispatch(fetchAllCategories());
         } else if (activeTab === 'users' || activeTab === 'managers') {
             dispatch(fetchAllUsers());
+        } else if (activeTab === 'banners') {
+            dispatch(fetchBanners());
         }
 
         // Persist tab choice
@@ -98,6 +108,8 @@ const AdminDashboard = () => {
             setIsAddMode(false);
             setNewProduct({ name: '', price: '', category: '', description: '', quantityAvailable: 10, images: [] });
             setImageFiles([]);
+        }).catch(err => {
+            alert("Failed to add product: " + err);
         });
     };
 
@@ -120,6 +132,31 @@ const AdminDashboard = () => {
     const handleDeleteCategory = (id) => {
         if (window.confirm("Delete this category? Products using this category will remain, but the category won't show in the dropdown.")) {
             dispatch(removeCategory(id));
+        }
+    };
+
+    const handleAddBanner = (e) => {
+        e.preventDefault();
+        if (!bannerFile) return alert("Please select an image");
+        if (bannerFile.size > 1024 * 1024) return alert("Banner image size must be less than 1MB");
+
+        const formData = new FormData();
+        formData.append('image', bannerFile);
+        formData.append('title', newBanner.title);
+        formData.append('description', newBanner.description);
+        formData.append('link', newBanner.link);
+        formData.append('order', newBanner.order);
+
+        dispatch(addNewBanner(formData)).then(() => {
+            setIsAddBannerMode(false);
+            setNewBanner({ title: '', description: '', link: '', order: 0 });
+            setBannerFile(null);
+        });
+    };
+
+    const handleDeleteBanner = (id) => {
+        if (window.confirm("Remove this banner from homepage?")) {
+            dispatch(removeBanner(id));
         }
     };
 
@@ -155,10 +192,14 @@ const AdminDashboard = () => {
 
     const filteredUsers = users.filter(u => {
         const query = searchQuery.toLowerCase();
+        const fullName = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase();
+        const username = u.username?.toLowerCase() || '';
+        const email = u.email?.toLowerCase() || '';
+
         const matchesSearch =
-            (u.firstName + ' ' + u.lastName).toLowerCase().includes(query) ||
-            u.username?.toLowerCase().includes(query) ||
-            u.email?.toLowerCase().includes(query);
+            fullName.includes(query) ||
+            username.includes(query) ||
+            email.includes(query);
 
         if (activeTab === 'managers') return matchesSearch && u.role === 'manager';
         if (activeTab === 'users') return matchesSearch && u.role === 'user';
@@ -231,6 +272,9 @@ const AdminDashboard = () => {
                         </button>
                         <button onClick={() => setActiveTab('categories')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Tags size={20} /> Product Categories
+                        </button>
+                        <button onClick={() => setActiveTab('banners')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'banners' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                            <Layout size={20} /> Homepage Banners
                         </button>
                         {user?.role === 'owner' && (
                             <>
@@ -341,7 +385,7 @@ const AdminDashboard = () => {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-gray-600 font-medium">₹{p.price.toLocaleString()}</td>
+                                                    <td className="px-6 py-4 text-gray-600 font-medium">₹{p.price?.toLocaleString() || '0'}</td>
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${p.quantityAvailable > 5 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
                                                             {p.quantityAvailable} in stock
@@ -422,6 +466,153 @@ const AdminDashboard = () => {
                                             >
                                                 <Trash2 size={18} />
                                             </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'banners' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">Homepage Banners</h2>
+                                    <p className="text-gray-500 text-sm">Manage the images cycling on your home page hero section.</p>
+                                </div>
+                                <button onClick={() => setIsAddBannerMode(true)} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+                                    <Plus size={20} /> Add New Banner
+                                </button>
+                            </div>
+
+                            {isAddBannerMode && (
+                                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                                    <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden">
+                                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                            <h3 className="text-xl font-bold text-gray-900">Upload New Banner</h3>
+                                            <button onClick={() => setIsAddBannerMode(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><XIcon /></button>
+                                        </div>
+                                        <form onSubmit={handleAddBanner} className="p-6 space-y-6">
+                                            <div className="space-y-4">
+                                                {/* Image Upload Area */}
+                                                <div className="group relative aspect-[21/9] w-full border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden hover:border-red-400 transition-all cursor-pointer">
+                                                    {bannerFile ? (
+                                                        <>
+                                                            <img src={URL.createObjectURL(bannerFile)} className="w-full h-full object-cover" alt="Preview" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                <button type="button" onClick={() => setBannerFile(null)} className="p-3 bg-red-600 text-white rounded-full">
+                                                                    <Trash2 size={24} />
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <label className="flex flex-col items-center gap-2 cursor-pointer w-full h-full justify-center">
+                                                            <div className="p-4 bg-gray-50 rounded-full text-gray-400 group-hover:text-red-600 group-hover:bg-red-50 transition-all">
+                                                                <ImageIcon size={32} />
+                                                            </div>
+                                                            <div className="text-center">
+                                                                <p className="font-bold text-gray-900">Click to upload banner</p>
+                                                                <p className="text-xs text-gray-500 mt-1">Recommended: 1920x800px or larger</p>
+                                                            </div>
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => setBannerFile(e.target.files[0])}
+                                                                required
+                                                            />
+                                                        </label>
+                                                    )}
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-1">
+                                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Banner Title</label>
+                                                        <input
+                                                            placeholder="Ex: Festive Collection"
+                                                            value={newBanner.title}
+                                                            onChange={e => setNewBanner({ ...newBanner, title: e.target.value })}
+                                                            className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Display Order</label>
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Priority (0-99)"
+                                                            value={newBanner.order}
+                                                            onChange={e => setNewBanner({ ...newBanner, order: e.target.value })}
+                                                            className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Description</label>
+                                                    <textarea
+                                                        placeholder="Short catchy tagline..."
+                                                        value={newBanner.description}
+                                                        onChange={e => setNewBanner({ ...newBanner, description: e.target.value })}
+                                                        className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500 h-24"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Target Link (Optional)</label>
+                                                    <input
+                                                        placeholder="Ex: /shop or /category/id"
+                                                        value={newBanner.link}
+                                                        onChange={e => setNewBanner({ ...newBanner, link: e.target.value })}
+                                                        className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                                <button type="button" onClick={() => setIsAddBannerMode(false)} className="px-6 py-3 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
+                                                <button type="submit" className="bg-red-600 text-white px-10 py-3 rounded-xl font-bold hover:bg-red-700 shadow-xl shadow-red-100 transition-all active:scale-95">Upload Banner</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {bannerLoading ? (
+                                    <div className="col-span-full py-24 text-center">
+                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+                                        <p className="text-gray-500">Retrieving banner gallery...</p>
+                                    </div>
+                                ) : banners.length === 0 ? (
+                                    <div className="col-span-full py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                                        <ImageIcon size={64} className="mb-4 opacity-20" />
+                                        <p className="font-bold">No active banners found.</p>
+                                        <p className="text-sm">Add your first banner to see it on the home page.</p>
+                                    </div>
+                                ) : (
+                                    banners.map((banner) => (
+                                        <div key={banner._id} className="group relative bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500">
+                                            <div className="aspect-[21/9] w-full relative">
+                                                <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                                                    {banner.title && <h3 className="text-white text-2xl font-serif font-bold mb-2">{banner.title}</h3>}
+                                                    {banner.description && <p className="text-white/80 text-sm font-medium line-clamp-1">{banner.description}</p>}
+                                                </div>
+
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={() => handleDeleteBanner(banner._id)}
+                                                    className="absolute top-4 right-4 p-3 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-700 shadow-xl transform translate-y-[-10px] group-hover:translate-y-0"
+                                                >
+                                                    <Trash2 size={20} />
+                                                </button>
+
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-900 border border-white/50">
+                                                        Order: {banner.order}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))
                                 )}
@@ -510,7 +701,7 @@ const AdminDashboard = () => {
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold">
-                                                                    {u.firstName[0]}{u.lastName[0]}
+                                                                    {u.firstName?.[0]}{u.lastName?.[0]}
                                                                 </div>
                                                                 <div className="flex flex-col">
                                                                     <span className="font-bold text-gray-900">{u.firstName} {u.lastName}</span>

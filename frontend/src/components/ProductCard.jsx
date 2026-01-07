@@ -1,5 +1,6 @@
 import React from 'react';
-import { Heart, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Star, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleWishlistProduct } from '../redux/slices/userSlice';
 import { Link } from 'react-router-dom';
@@ -7,7 +8,8 @@ import confetti from 'canvas-confetti';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
-    const { user, profile } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
+    const [isHovered, setIsHovered] = React.useState(false);
 
     const userProfile = useSelector(state => state.user.profile);
     const currentUser = userProfile || user;
@@ -24,10 +26,10 @@ const ProductCard = ({ product }) => {
 
         if (!isLiked) {
             confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#EF4444', '#FCD34D', '#FFFFFF'], // Red, Gold, White
+                particleCount: 80,
+                spread: 60,
+                origin: { y: 0.7 },
+                colors: ['#991B1B', '#D97706', '#FFFFFF'], // Royal Red, Gold, White
                 disableForReducedMotion: true
             });
         }
@@ -36,87 +38,115 @@ const ProductCard = ({ product }) => {
     };
 
     const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
-    const [isTransitioning, setIsTransitioning] = React.useState(false);
     const images = product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []);
 
     React.useEffect(() => {
-        if (images.length <= 1) return;
+        if (images.length <= 1 || !isHovered) return;
 
         const interval = setInterval(() => {
-            setIsTransitioning(true);
-            setTimeout(() => {
-                setCurrentImageIndex((prev) => (prev + 1) % images.length);
-                setIsTransitioning(false);
-            }, 300); // Wait for fade out
-        }, 3000); // Cycle every 3 seconds
+            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        }, 1500);
 
         return () => clearInterval(interval);
-    }, [images.length]);
+    }, [images.length, isHovered]);
 
     const currentImage = images[currentImageIndex];
 
     return (
-        <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-
+        <motion.div
+            onHoverStart={() => setIsHovered(true)}
+            onHoverEnd={() => setIsHovered(false)}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="group relative bg-white rounded-3xl overflow-hidden shadow-premium hover:shadow-2xl transition-all duration-500 border border-gray-100/50"
+        >
             {/* Image Container */}
-            <div className="relative overflow-hidden aspect-[4/5] bg-white">
-                <img
-                    src={currentImage}
-                    alt={product.name}
-                    className={`w-full h-full object-contain transform group-hover:scale-110 transition-all duration-300 ${isTransitioning ? 'opacity-80 blur-sm scale-95' : 'opacity-100 scale-100'}`}
-                />
+            <div className="relative overflow-hidden aspect-[4/5] bg-gift-cream">
+                <AnimatePresence mode="wait">
+                    <motion.img
+                        key={currentImage}
+                        src={currentImage}
+                        alt={product.name}
+                        initial={{ opacity: 0, scale: 1.1 }}
+                        animate={{ opacity: 1, scale: isHovered ? 1.1 : 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="w-full h-full object-contain p-4"
+                    />
+                </AnimatePresence>
 
-                {/* Dots indicator for multiple images */}
-                {images.length > 1 && (
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                        {images.map((_, idx) => (
-                            <div
-                                key={idx}
-                                className={`h-1 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-4 bg-red-600' : 'w-1 bg-white/50'}`}
-                            />
-                        ))}
-                    </div>
-                )}
+                {/* Badge Overlay */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    {product.isNew && (
+                        <span className="px-3 py-1 bg-royal-red text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                            New
+                        </span>
+                    )}
+                    {product.category && (
+                        <span className="px-3 py-1 glass-card text-royal-black text-[10px] font-black uppercase tracking-widest rounded-full">
+                            {typeof product.category === 'object' ? product.category.name : product.category}
+                        </span>
+                    )}
+                </div>
 
-                {/* Actions Overlay */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 group-hover:translate-x-0 transition-transform duration-300">
-                    <button
-                        onClick={handleWishlist}
-                        className={`p-3 rounded-full shadow-md transition-colors ${isLiked ? 'bg-red-600 text-white' : 'bg-white text-gray-600 hover:bg-red-600 hover:text-white'}`}
+                {/* Favorite Button */}
+                <button
+                    onClick={handleWishlist}
+                    className={`absolute top-4 right-4 p-3 rounded-full shadow-2xl transition-all duration-300 transform ${isHovered ? 'scale-100 opacity-100' : 'scale-50 opacity-0'} ${isLiked ? 'bg-royal-red text-white' : 'glass-card text-gray-900'}`}
+                >
+                    <Heart size={16} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} />
+                </button>
+
+                {/* Bottom Action Bar */}
+                <div className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+                    <Link
+                        to={`/product/${product._id}`}
+                        className="w-full bg-royal-black text-white py-3 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-xl hover:bg-royal-red transition-colors"
                     >
-                        <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
-                    </button>
-                </div>
-
-                {product.isNew && (
-                    <span className="absolute top-4 left-4 bg-gift-gold text-white text-xs font-bold px-3 py-1 rounded-full">
-                        NEW
-                    </span>
-                )}
-            </div>
-
-            {/* Content */}
-            <div className="p-3 md:p-5">
-                <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={12} className={i < product.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">({product.reviews})</span>
-                </div>
-
-                <h3 className="font-serif font-bold text-lg text-gray-900 mb-1 group-hover:text-red-600 transition-colors">
-                    {product.name}
-                </h3>
-                <p className="text-sm text-gray-500 mb-4 line-clamp-1">{product.description}</p>
-
-                <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">₹{product.price}</span>
-                    <Link to={`/product/${product._id}`} className="text-sm font-medium text-red-600 hover:underline decoration-2 underline-offset-4">
-                        View Details
+                        Explore Now
+                        <ArrowUpRight size={16} />
                     </Link>
                 </div>
             </div>
-        </div>
+
+            {/* Content */}
+            <div className="p-6">
+                <div className="flex items-center gap-1.5 mb-3">
+                    <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                            <Star
+                                key={i}
+                                size={12}
+                                className={i < product.rating ? "fill-royal-gold text-royal-gold" : "text-gray-200"}
+                            />
+                        ))}
+                    </div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        {product.reviews} Reviews
+                    </span>
+                </div>
+
+                <h3 className="font-serif font-bold text-xl text-gray-900 mb-2 truncate group-hover:text-royal-red transition-colors">
+                    {product.name}
+                </h3>
+
+                <p className="text-sm text-gray-500 mb-4 line-clamp-2 font-light leading-relaxed">
+                    {product.description}
+                </p>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100/50">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Starting from</span>
+                        <span className="text-2xl font-black text-gray-900">₹{product.price}</span>
+                    </div>
+                    <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <ShoppingBag size={18} />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
     );
 };
 

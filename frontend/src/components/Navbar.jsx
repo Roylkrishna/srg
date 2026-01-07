@@ -38,31 +38,47 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className={cn("fixed w-full z-50 transition-all duration-300", scrolled ? "bg-white shadow-md" : "bg-transparent")}>
+        <nav className={cn(
+            "fixed w-full z-50 transition-all duration-500",
+            scrolled ? "glass-nav py-3" : "bg-transparent py-5"
+        )}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-20">
+                <div className="flex justify-between items-center h-14">
 
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2 group">
-                        <img src="/logo.png" alt="Shree Rama Gift Center" className="h-12 w-auto object-contain" />
-                        <span className="font-serif text-2xl font-bold text-gray-800 tracking-wide">
-                            Shree Rama<span className="text-red-600">.</span>
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="relative">
+                            <img src="/logo.png" alt="SRG" className="h-12 w-auto object-contain relative z-10" />
+                            <div className="absolute inset-0 bg-royal-gold/20 blur-xl rounded-full group-hover:bg-royal-gold/40 transition-colors"></div>
+                        </div>
+                        <span className="font-serif text-2xl font-bold text-gray-900 tracking-tight">
+                            Shree Rama<span className="text-royal-red">.</span>
                         </span>
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        <Link to="/" className="text-gray-600 hover:text-red-600 font-medium transition-colors">Home</Link>
-                        <Link to="/shop" className="text-gray-600 hover:text-red-600 font-medium transition-colors">Shop</Link>
-                        <Link to="/about" className="text-gray-600 hover:text-red-600 font-medium transition-colors">About Us</Link>
-                        <Link to="/contact" className="text-gray-600 hover:text-red-600 font-medium transition-colors">Contact</Link>
+                    <div className="hidden md:flex items-center space-x-10">
+                        {['Home', 'Shop', 'About Us', 'Contact'].map((item) => (
+                            <Link
+                                key={item}
+                                to={item === 'Home' ? '/' : `/${item.toLowerCase().replace(' ', '')}`}
+                                className="text-gray-600 hover:text-royal-red font-medium transition-all duration-300 relative group text-sm uppercase tracking-widest"
+                            >
+                                {item}
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-royal-red transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                        ))}
                     </div>
 
                     {/* Icons */}
-                    <div className="hidden md:flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-8">
                         <div className="relative group">
-                            <input type="text" placeholder="Search gifts..." className="w-0 group-hover:w-48 focus:w-48 transition-all duration-300 border-b border-gray-300 focus:border-red-600 bg-transparent outline-none text-sm px-2 text-gray-600 placeholder-gray-400" />
-                            <Search className="text-gray-600 group-hover:text-red-600 cursor-pointer transition-colors" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="w-0 group-hover:w-40 focus:w-40 transition-all duration-500 border-none bg-gray-100/50 rounded-full outline-none text-xs px-0 group-hover:px-4 focus:px-4 py-2 text-gray-700 placeholder-gray-400 backdrop-blur-sm"
+                            />
+                            <Search className="text-gray-600 group-hover:text-royal-red cursor-pointer transition-colors" size={18} />
                         </div>
 
                         {user ? (
@@ -71,82 +87,60 @@ const Navbar = () => {
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="flex items-center gap-2 group focus:outline-none"
                                 >
-                                    <div className="h-10 w-10 rounded-full border-2 border-transparent group-hover:border-red-600 transition-all p-0.5">
+                                    <div className="h-10 w-10 rounded-full border-2 border-white shadow-premium group-hover:border-royal-red transition-all p-0.5 overflow-hidden">
                                         {user?.profilePicture ? (
                                             <img src={user.profilePicture} alt="Profile" className="h-full w-full rounded-full object-cover" />
                                         ) : (
-                                            <div className="h-full w-full rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm uppercase">
+                                            <div className="h-full w-full rounded-full bg-red-50 text-royal-red flex items-center justify-center font-bold text-xs uppercase">
                                                 {user?.firstName?.[0]}{user?.lastName?.[0]}
                                             </div>
                                         )}
                                     </div>
-                                    <span className="hidden lg:block font-medium text-gray-700 group-hover:text-red-600 transition-colors">
-                                        {user.firstName}
-                                    </span>
                                 </button>
 
                                 {/* Dropdown Menu */}
                                 {dropdownOpen && (
-                                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="px-4 py-3 border-b border-gray-50 mb-2">
+                                    <div className="absolute right-0 top-full mt-4 w-72 glass-card rounded-2xl shadow-premium py-3 animate-in fade-in slide-in-from-top-4 duration-300 overflow-hidden">
+                                        <div className="px-6 py-4 border-b border-gray-100/50 mb-2">
                                             <p className="text-sm font-bold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
-                                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                                            <div className="mt-1 inline-block px-2 py-0.5 rounded bg-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-600">
+                                            <p className="text-xs text-gray-500 truncate mb-2">{user.email}</p>
+                                            <span className="px-2 py-0.5 rounded-full bg-royal-red/10 text-royal-red text-[10px] font-black uppercase tracking-wider">
                                                 {user.role}
-                                            </div>
+                                            </span>
                                         </div>
-                                        <Link
-                                            to="/dashboard"
-                                            onClick={() => setDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                        >
-                                            <User size={18} /> See Profile
-                                        </Link>
-                                        <Link
-                                            to="/dashboard?edit=true"
-                                            onClick={() => setDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                        >
-                                            <Edit size={18} /> Edit Profile
-                                        </Link>
-                                        <Link
-                                            to="/wishlist"
-                                            onClick={() => setDropdownOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                        >
-                                            <Heart size={18} /> My Wishlist
-                                        </Link>
-                                        {user.role !== 'user' && (
-                                            <Link
-                                                to="/admin"
-                                                onClick={() => setDropdownOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                        <div className="space-y-1 px-2">
+                                            <DropdownLink to="/dashboard" onClick={() => setDropdownOpen(false)} icon={<User size={16} />} text="Profile" />
+                                            <DropdownLink to="/wishlist" onClick={() => setDropdownOpen(false)} icon={<Heart size={16} />} text="Wishlist" />
+                                            {user.role !== 'user' && (
+                                                <DropdownLink to="/admin" onClick={() => setDropdownOpen(false)} icon={<Shield size={16} />} text="Admin Portal" />
+                                            )}
+                                        </div>
+                                        <div className="h-px bg-gray-100/50 my-2"></div>
+                                        <div className="px-2">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-royal-red hover:bg-red-50 rounded-xl transition-all font-semibold"
                                             >
-                                                <Shield size={18} /> Admin Panel
-                                            </Link>
-                                        )}
-                                        <div className="h-px bg-gray-50 my-2"></div>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium border-none outline-none text-left"
-                                        >
-                                            <LogOut size={18} /> Sign Out
-                                        </button>
+                                                <LogOut size={16} /> Sign Out
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <Link to="/login" className="flex items-center gap-2 text-gray-700 hover:text-red-600 font-medium">
-                                <User size={20} />
-                                <span>Login</span>
+                            <Link to="/login" className="px-6 py-2.5 bg-royal-red text-white rounded-full text-sm font-bold hover:bg-royal-black transition-all shadow-lg shadow-red-200">
+                                Login
                             </Link>
                         )}
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <div className="md:hidden flex items-center gap-4">
-                        <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600 hover:text-red-600">
-                            {isOpen ? <X size={28} /> : <Menu size={28} />}
+                    <div className="md:hidden flex items-center">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="p-2 text-gray-600 hover:text-royal-red transition-colors"
+                        >
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
                 </div>
@@ -154,11 +148,11 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {isOpen && (
-                <div className="md:hidden bg-white border-b border-gray-100 absolute w-full animate-in slide-in-from-top-4 duration-200">
-                    <div className="px-4 pt-4 pb-6 space-y-4">
+                <div className="md:hidden glass-nav absolute w-full animate-in slide-in-from-top-4 duration-300 border-b border-gray-100/50">
+                    <div className="px-4 py-8 space-y-6">
                         {user && (
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl mb-2">
-                                <div className="h-12 w-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold text-lg">
+                            <div className="flex items-center gap-4 p-4 glass-card rounded-2xl">
+                                <div className="h-12 w-12 rounded-full gold-gradient shadow-lg flex items-center justify-center text-white font-bold text-lg">
                                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                                 </div>
                                 <div>
@@ -167,38 +161,35 @@ const Navbar = () => {
                                 </div>
                             </div>
                         )}
-                        <Link to="/" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg">Home</Link>
-                        <Link to="/shop" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg">Shop</Link>
-                        <Link to="/about" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg">About</Link>
+                        <div className="flex flex-col gap-4 px-2">
+                            {['Home', 'Shop', 'About', 'Contact'].map((item) => (
+                                <Link
+                                    key={item}
+                                    to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-lg font-serif font-bold text-gray-800 hover:text-royal-red transition-colors"
+                                >
+                                    {item}
+                                </Link>
+                            ))}
+                        </div>
 
-                        {user && (
-                            <>
-                                <Link to="/dashboard" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg border-t border-gray-50 pt-2 flex items-center gap-2"><User size={20} /> My Profile</Link>
-                                <Link to="/wishlist" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg flex items-center gap-2"><Heart size={20} /> My Wishlist</Link>
-                                <Link to="/dashboard?edit=true" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg flex items-center gap-2"><Edit size={20} /> Edit Profile</Link>
-                                {user.role !== 'user' && (
-                                    <Link to="/admin" onClick={() => setIsOpen(false)} className="block text-gray-700 hover:text-red-600 font-medium text-lg flex items-center gap-2"><Shield size={20} /> Admin Panel</Link>
-                                )}
-                            </>
-                        )}
-
-                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-4">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-red-500"
-                                />
-                                <Search className="absolute left-3 top-3.5 text-gray-400 w-4 h-4" />
-                            </div>
-                            {user ? (
-                                <button onClick={handleLogout} className="w-full bg-red-50 text-red-600 py-3 rounded-lg text-center font-bold flex items-center justify-center gap-2 transition-colors">
+                        <div className="pt-6 border-t border-gray-100/50 flex flex-col gap-4">
+                            {!user ? (
+                                <Link
+                                    to="/login"
+                                    onClick={() => setIsOpen(false)}
+                                    className="w-full bg-royal-red text-white py-4 rounded-xl text-center font-bold shadow-xl shadow-red-100"
+                                >
+                                    Get Started
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full bg-gray-50 text-royal-red py-4 rounded-xl text-center font-bold flex items-center justify-center gap-2"
+                                >
                                     <LogOut size={20} /> Sign Out
                                 </button>
-                            ) : (
-                                <Link to="/login" onClick={() => setIsOpen(false)} className="w-full bg-red-600 text-white py-3 rounded-lg text-center font-medium shadow-lg shadow-red-200">
-                                    Sign In
-                                </Link>
                             )}
                         </div>
                     </div>
@@ -207,5 +198,16 @@ const Navbar = () => {
         </nav>
     );
 };
+
+const DropdownLink = ({ to, onClick, icon, text }) => (
+    <Link
+        to={to}
+        onClick={onClick}
+        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-xl transition-all group"
+    >
+        <div className="text-gray-400 group-hover:text-royal-red transition-colors">{icon}</div>
+        <span className="font-medium group-hover:text-gray-900 transition-colors">{text}</span>
+    </Link>
+);
 
 export default Navbar;
