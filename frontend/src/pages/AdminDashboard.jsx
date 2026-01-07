@@ -512,7 +512,7 @@ const AdminDashboard = () => {
                                                             </div>
                                                             <div className="text-center">
                                                                 <p className="font-bold text-gray-900">Click to upload banner</p>
-                                                                <p className="text-xs text-gray-500 mt-1">Recommended: 1920x800px or larger</p>
+                                                                <p className="text-xs text-gray-500 mt-1">Recommended: Wide Banner (e.g. 1920x640px)</p>
                                                             </div>
                                                             <input
                                                                 type="file"
