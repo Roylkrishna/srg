@@ -100,6 +100,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/stats', statsRoutes);
 
 // Error Handling Middleware

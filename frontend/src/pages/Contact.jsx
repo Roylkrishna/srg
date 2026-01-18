@@ -2,8 +2,10 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const Contact = () => {
+    const { info: contact } = useSelector((state) => state.contact);
     return (
         <div className="min-h-screen bg-gift-cream">
             <Navbar />
@@ -35,7 +37,17 @@ const Contact = () => {
                             <ContactItem
                                 icon={<Phone size={20} />}
                                 title="Call Us"
-                                info="[Address]"
+                                info={contact?.phone || "[Phone]"}
+                            />
+                            <ContactItem
+                                icon={<Mail size={20} />}
+                                title="Email Us"
+                                info={contact?.email || "hello@shreeramagifts.com"}
+                            />
+                            <ContactItem
+                                icon={<MapPin size={20} />}
+                                title="Visit Us"
+                                info={contact?.address || "[Address]"}
                             />
                         </div>
                     </motion.div>

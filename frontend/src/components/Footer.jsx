@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 
 const Footer = () => {
     const { categories } = useSelector((state) => state.categories);
+    const { info: contact } = useSelector((state) => state.contact);
 
     return (
         <footer className="bg-white pt-24 pb-12 border-t border-gray-100">
@@ -23,9 +24,9 @@ const Footer = () => {
                             Curating handcrafted treasures and premium gifting experiences inspired by India's rich heritage. Elevate every celebration with royal elegance.
                         </p>
                         <div className="flex gap-4">
-                            <SocialIcon icon={<Instagram size={18} />} />
-                            <SocialIcon icon={<Facebook size={18} />} />
-                            <SocialIcon icon={<Twitter size={18} />} />
+                            {contact?.instagram && <SocialIcon href={contact.instagram} icon={<Instagram size={18} />} />}
+                            {contact?.facebook && <SocialIcon href={contact.facebook} icon={<Facebook size={18} />} />}
+                            {contact?.youtube && <SocialIcon href={contact.youtube} icon={<Twitter size={18} />} />}
                         </div>
                     </div>
 
@@ -65,19 +66,19 @@ const Footer = () => {
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
                                     <Phone size={16} />
                                 </div>
-                                <span className="text-sm text-gray-600 font-medium">[Phone Number]</span>
+                                <span className="text-sm text-gray-600 font-medium">{contact?.phone || '[Phone Number]'}</span>
                             </li>
                             <li className="flex gap-4 items-start group">
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
                                     <Mail size={16} />
                                 </div>
-                                <span className="text-sm text-gray-600 font-medium whitespace-nowrap">hello@shreeramagifts.com</span>
+                                <span className="text-sm text-gray-600 font-medium whitespace-nowrap">{contact?.email || 'hello@shreeramagifts.com'}</span>
                             </li>
                             <li className="flex gap-4 items-start group">
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
                                     <MapPin size={16} />
                                 </div>
-                                <span className="text-sm text-gray-600 font-medium">[Address]</span>
+                                <span className="text-sm text-gray-600 font-medium">{contact?.address || '[Address]'}</span>
                             </li>
                         </ul>
                     </div>
@@ -109,8 +110,8 @@ const FooterLink = ({ to, text }) => (
     </li>
 );
 
-const SocialIcon = ({ icon }) => (
-    <a href="#" className="h-10 w-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:bg-royal-red hover:text-white transition-all shadow-sm">
+const SocialIcon = ({ icon, href }) => (
+    <a href={href || "#"} target="_blank" rel="noopener noreferrer" className="h-10 w-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:bg-royal-red hover:text-white transition-all shadow-sm">
         {icon}
     </a>
 );
