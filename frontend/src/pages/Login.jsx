@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Gift, Eye, EyeOff } from 'lucide-react';
+import { Gift, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/slices/authSlice';
-import ReCAPTCHA from "react-google-recaptcha";
+import api from '../lib/api';
 
 const Login = () => {
     const [formData, setFormData] = useState({ identifier: '', password: '' });
@@ -27,14 +27,30 @@ const Login = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleCaptchaChange = (token) => {
-        setCaptchaToken(token);
+    const [captchaSvg, setCaptchaSvg] = useState('');
+
+    useEffect(() => {
+        fetchCaptcha();
+    }, []);
+
+    const fetchCaptcha = async () => {
+        try {
+            const response = await api.get('/auth/captcha');
+            setCaptchaSvg(response.data);
+            setCaptchaToken(''); // Reset input
+        } catch (error) {
+            console.error("Failed to fetch captcha", error);
+        }
+    };
+
+    const handleCaptchaChange = (e) => {
+        setCaptchaToken(e.target.value);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!captchaToken) {
-            alert("Please verify that you are not a robot.");
+            alert("Please enter the captcha.");
             return;
         }
         dispatch(loginUser({ ...formData, captchaToken }));
@@ -113,10 +129,29 @@ const Login = () => {
                             </div>
                         </div>
 
-                        <div className="flex justify-center">
-                            <ReCAPTCHA
-                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // Test key
+                        <div className="flex flex-col gap-3">
+                            <label className="block text-sm font-medium text-gray-700">Type the characters below</label>
+                            <div className="flex items-center gap-4">
+                                <div
+                                    className="h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-300 w-40 flex items-center justify-center p-2"
+                                    dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={fetchCaptcha}
+                                    className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                                    title="Refresh Captcha"
+                                >
+                                    <RefreshCw size={20} />
+                                </button>
+                            </div>
+                            <input
+                                type="text"
+                                value={captchaToken || ''}
                                 onChange={handleCaptchaChange}
+                                placeholder="Enter captcha"
+                                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-red-600 focus:border-red-600 transition-colors"
+                                required
                             />
                         </div>
 

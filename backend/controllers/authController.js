@@ -70,24 +70,41 @@ exports.signup = async (req, res, next) => {
     }
 };
 
-const axios = require('axios');
+const svgCaptcha = require('svg-captcha');
+
+exports.getCaptcha = (req, res) => {
+    const captcha = svgCaptcha.create({
+        size: 5,
+        noise: 2,
+        color: true,
+        background: '#cc9966'
+    });
+
+    res.cookie('captcha', captcha.text, {
+        httpOnly: true,
+        signed: true,
+        maxAge: 10 * 60 * 1000 // 10 minutes
+    });
+
+    res.status(200).send(captcha.data);
+};
 
 exports.login = async (req, res, next) => {
-    const { identifier, password, captchaToken } = req.body; // Identifier can be email or username
+    const { identifier, password, captchaToken } = req.body; // captchaToken here will be the text input
 
     try {
         // Verify Captcha
         if (!captchaToken) {
-            return next({ statusCode: 400, message: "Captcha token is missing" });
+            return next({ statusCode: 400, message: "Please enter the captcha" });
         }
 
-        const secretKey = process.env.RECAPTCHA_SECRET_KEY || "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // Use Test Key if env missing
-        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
-
-        const captchaResponse = await axios.post(verifyUrl);
-        if (!captchaResponse.data.success) {
-            return next({ statusCode: 400, message: "Captcha verification failed" });
+        const signedCookie = req.signedCookies.captcha;
+        if (!signedCookie || signedCookie !== captchaToken) {
+            return next({ statusCode: 400, message: "Invalid captcha. Please try again." });
         }
+
+        // Clear captcha cookie after usage/attempt to prevent reuse (optional but good security)
+        res.clearCookie('captcha');
 
         const validUser = await User.findOne({
             $or: [{ email: identifier }, { username: identifier }]
