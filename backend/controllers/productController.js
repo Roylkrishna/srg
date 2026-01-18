@@ -150,18 +150,21 @@ exports.getAllProducts = async (req, res, next) => {
         let filter = {};
 
         if (search) {
+            // Escape special characters for ReDoS protection
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
             // 1. Find categories that match the search term
             const Category = require('../models/Category');
             const matchingCategories = await Category.find({
-                name: { $regex: search, $options: 'i' }
+                name: { $regex: escapedSearch, $options: 'i' }
             }).select('_id');
             const categoryIds = matchingCategories.map(cat => cat._id);
 
             // 2. Build filter for product name, description, and category
             filter = {
                 $or: [
-                    { name: { $regex: search, $options: 'i' } },
-                    { description: { $regex: search, $options: 'i' } },
+                    { name: { $regex: escapedSearch, $options: 'i' } },
+                    { description: { $regex: escapedSearch, $options: 'i' } },
                     { category: { $in: categoryIds } }
                 ]
             };

@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 
@@ -12,6 +14,35 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Security Headers
+app.use(helmet());
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req, res) => {
+        // Exempt admin-heavy operations (Uploads, Edits)
+        // This assumes these routes are protected by Auth Middleware
+        if (req.method === 'OPTIONS') return true;
+        const adminMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
+        const adminPaths = [
+            '/api/products',
+            '/api/categories',
+            '/api/banners',
+            '/api/stats'
+        ];
+
+        if (adminMethods.includes(req.method) && adminPaths.some(p => req.originalUrl.startsWith(p))) {
+            return true;
+        }
+        return false;
+    }
+});
+app.use(limiter);
 
 const allowedOrigins = [
     'http://localhost:5173',
