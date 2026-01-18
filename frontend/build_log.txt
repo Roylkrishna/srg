@@ -1,0 +1,40 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 15 modules transformed.
+[31m✗[39m Build failed in 1.11s
+[31merror during build:
+[31m[vite:esbuild] Transform failed with 2 errors:
+F:/Antigravity/srg render/frontend/src/pages/AdminDashboard.jsx:311:30: ERROR: Unexpected closing "button" tag does not match opening fragment tag
+F:/Antigravity/srg render/frontend/src/pages/AdminDashboard.jsx:312:32: ERROR: Expected ")" but found "onClick"[31m
+file: [36mF:/Antigravity/srg render/frontend/src/pages/AdminDashboard.jsx:311:30[31m
+[33m
+[33mUnexpected closing "button" tag does not match opening fragment tag[33m
+309 |                                  </button>
+310 |                                  <Users size={20} /> All Users
+311 |                              </button>
+    |                                ^
+312 |                          <button onClick={() => setActiveTab('contact')} className={`w-full flex items-center gap-3 px...
+313 |                              <MapPin size={20} /> Contact Settings
+
+[33mExpected ")" but found "onClick"[33m
+310 |                                  <Users size={20} /> All Users
+311 |                              </button>
+312 |                          <button onClick={() => setActiveTab('contact')} className={`w-full flex items-center gap-3 px...
+    |                                  ^
+313 |                              <MapPin size={20} /> Contact Settings
+314 |                          </button>
+[31m
+    at failureErrorWithLog (F:\Antigravity\srg render\frontend\node_modules\esbuild\lib\main.js:1467:15)
+    at F:\Antigravity\srg render\frontend\node_modules\esbuild\lib\main.js:736:50
+    at responseCallbacks.<computed> (F:\Antigravity\srg render\frontend\node_modules\esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (F:\Antigravity\srg render\frontend\node_modules\esbuild\lib\main.js:658:12)
+    at Socket.readFromStdout (F:\Antigravity\srg render\frontend\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
