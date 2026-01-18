@@ -103,7 +103,7 @@ const Navbar = () => {
                                             <button
                                                 onClick={() => {
                                                     setSearchQuery('');
-                                                    navigate(`/shop?search=${searchQuery}`);
+                                                    document.getElementById('product-collection')?.scrollIntoView({ behavior: 'smooth' });
                                                 }}
                                                 className="text-[10px] font-black uppercase tracking-widest text-royal-red hover:underline"
                                             >

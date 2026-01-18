@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Shop from './pages/Shop';
 import ProductDetails from './pages/ProductDetails';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -76,7 +75,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/shop" element={<Shop />} />
+
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/product/:id" element={<ProductDetails />} />

@@ -136,14 +136,9 @@ const ProductCard = ({ product }) => {
                     {product.description}
                 </p>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100/50">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Starting from</span>
-                        <span className="text-2xl font-black text-gray-900">₹{product.price}</span>
-                    </div>
-                    <div className="h-10 w-10 rounded-full gold-gradient flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <ShoppingBag size={18} />
-                    </div>
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Price</span>
+                    <span className="text-2xl font-black text-gray-900">₹{product.price}</span>
                 </div>
             </div>
         </motion.div>

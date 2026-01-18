@@ -9,8 +9,6 @@ import { fetchStats } from '../redux/slices/statsSlice';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
-import TrustSection from '../components/TrustSection';
-import Newsletter from '../components/Newsletter';
 import SkeletonProduct from '../components/skeletons/SkeletonProduct';
 
 const Home = () => {
@@ -30,10 +28,8 @@ const Home = () => {
         <div className="min-h-screen bg-gift-cream selection:bg-royal-red/30">
             <Navbar />
             <Hero banners={banners} />
-            <TrustSection />
-
-            {/* Featured Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+            {/* Product Collection Section */}
+            <section id="product-collection" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -45,7 +41,7 @@ const Home = () => {
                         Handpicked Masterpieces
                         <span className="h-px w-10 bg-royal-red/30"></span>
                     </div>
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Trending Now</h2>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Our Collection</h2>
                     <p className="text-gray-500 max-w-2xl mx-auto font-light leading-relaxed text-sm sm:text-base">
                         Discover our most celebrated creations that define elegance and tradition.
                     </p>

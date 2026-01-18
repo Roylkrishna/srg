@@ -35,7 +35,7 @@ const Footer = () => {
                         <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-900 border-b border-royal-red/10 pb-4 inline-block">Explore</h4>
                         <ul className="space-y-4">
                             <FooterLink to="/" text="Home" />
-                            <FooterLink to="/shop" text="The Collection" />
+
                             <FooterLink to="/aboutus" text="Our Story" />
                             <FooterLink to="/contact" text="Contact Us" />
                         </ul>
