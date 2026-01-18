@@ -10,7 +10,7 @@ const Footer = () => {
     return (
         <footer className="bg-white pt-24 pb-12 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
 
                     {/* Brand Section */}
                     <div className="space-y-8">
@@ -41,22 +41,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Categories Section */}
-                    <div className="space-y-8">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-900 border-b border-royal-red/10 pb-4 inline-block">Categories</h4>
-                        <ul className="space-y-4">
-                            {categories?.slice(0, 4).map(cat => (
-                                <FooterLink
-                                    key={cat._id || cat.id}
-                                    to={`/shop?category=${cat._id || cat.id}`}
-                                    text={cat.name}
-                                />
-                            ))}
-                            {(!categories || categories.length === 0) && (
-                                <li className="text-sm text-gray-400 italic">No categories found</li>
-                            )}
-                        </ul>
-                    </div>
+
 
                     {/* Contact Section */}
                     <div className="space-y-8">

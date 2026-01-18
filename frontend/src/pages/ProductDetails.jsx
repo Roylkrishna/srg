@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Heart, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Star, Heart, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails } from '../redux/slices/productSlice';
@@ -32,7 +32,7 @@ const ProductDetails = () => {
                 <Navbar />
                 <div className="pt-32 text-center space-y-4">
                     <h2 className="text-3xl font-serif font-bold text-gray-900">Treasure Not Found</h2>
-                    <Link to="/shop" className="text-royal-red font-bold underline decoration-2 underline-offset-8">Return to Collection</Link>
+                    <Link to="/" className="text-royal-red font-bold underline decoration-2 underline-offset-8">Return to Collection</Link>
                 </div>
             </div>
         );
@@ -54,7 +54,7 @@ const ProductDetails = () => {
                 <div className="pt-32 text-center text-royal-red p-8">
                     <h2 className="text-2xl font-serif font-bold">Divine Connection Interrupted</h2>
                     <p className="text-gray-500 mt-2">{error}</p>
-                    <Link to="/shop" className="text-gray-900 mt-6 inline-block font-bold underline">Back to Shop</Link>
+                    <Link to="/" className="text-gray-900 mt-6 inline-block font-bold underline">Back to Collection</Link>
                 </div>
             </div>
         );
@@ -88,7 +88,7 @@ const ProductDetails = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
-                    <Link to="/shop" className="group inline-flex items-center gap-3 text-gray-400 hover:text-royal-black mb-12 transition-colors font-bold text-xs uppercase tracking-widest">
+                    <Link to="/" className="group inline-flex items-center gap-3 text-gray-400 hover:text-royal-black mb-12 transition-colors font-bold text-xs uppercase tracking-widest">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Back to Collection
                     </Link>
@@ -191,12 +191,7 @@ const ProductDetails = () => {
                                     </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="glass-card p-6 rounded-3xl space-y-2 border border-white/40">
-                                        <Truck size={24} className="text-royal-red" />
-                                        <h4 className="font-bold text-sm text-gray-900">Complimentary Delivery</h4>
-                                        <p className="text-[10px] text-gray-500 font-medium">Pan-India express shipping</p>
-                                    </div>
+                                <div className="grid grid-cols-1 gap-4">
                                     <div className="glass-card p-6 rounded-3xl space-y-2 border border-white/40">
                                         <ShieldCheck size={24} className="text-royal-gold" />
                                         <h4 className="font-bold text-sm text-gray-900">Certified Quality</h4>
