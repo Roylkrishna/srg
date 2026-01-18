@@ -34,17 +34,9 @@ const Home = () => {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-16 sm:mb-20 space-y-4 sm:space-y-6"
+                    className="text-center mb-16 sm:mb-20"
                 >
-                    <div className="flex justify-center items-center gap-3 text-royal-red font-black tracking-[0.3em] text-[10px] uppercase">
-                        <span className="h-px w-10 bg-royal-red/30"></span>
-                        Handpicked Masterpieces
-                        <span className="h-px w-10 bg-royal-red/30"></span>
-                    </div>
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Our Collection</h2>
-                    <p className="text-gray-500 max-w-2xl mx-auto font-light leading-relaxed text-sm sm:text-base">
-                        Discover our most celebrated creations that define elegance and tradition.
-                    </p>
                 </motion.div>
 
                 {loading ? (
