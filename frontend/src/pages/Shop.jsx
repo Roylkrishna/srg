@@ -65,11 +65,7 @@ const Shop = () => {
                             {showFilters ? 'Hide Filters' : 'Filters'}
                         </button>
 
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 text-gray-400 hover:text-royal-black font-bold text-xs uppercase tracking-widest transition-colors">
-                                Sort by: <span className="text-gray-900">Popular</span> <ChevronDown size={14} />
-                            </button>
-                        </div>
+
                     </div>
                 </motion.div>
 
@@ -122,24 +118,7 @@ const Shop = () => {
                                         </div>
                                     </div>
 
-                                    <div className="h-px bg-gray-100/50"></div>
 
-                                    <div>
-                                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-royal-gold"></span>
-                                            Price Range
-                                        </h3>
-                                        <div className="space-y-6">
-                                            <input
-                                                type="range"
-                                                className="w-full h-1 bg-gray-200 rounded-full appearance-none cursor-pointer accent-royal-red"
-                                            />
-                                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                                                <span>₹0</span>
-                                                <span>₹10,000+</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </motion.div>
                         )}

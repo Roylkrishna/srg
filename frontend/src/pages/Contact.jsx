@@ -35,17 +35,7 @@ const Contact = () => {
                             <ContactItem
                                 icon={<Phone size={20} />}
                                 title="Call Us"
-                                info="+91 98765 43210"
-                            />
-                            <ContactItem
-                                icon={<Mail size={20} />}
-                                title="Email Us"
-                                info="hello@shreeramagifts.com"
-                            />
-                            <ContactItem
-                                icon={<MapPin size={20} />}
-                                title="Visit Us"
-                                info="123 Royal Arcade, Heritage Street, Jaipur, Rajasthan"
+                                info="[Address]"
                             />
                         </div>
                     </motion.div>

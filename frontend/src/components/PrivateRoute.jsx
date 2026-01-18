@@ -11,13 +11,13 @@ const PrivateRoute = ({ children }) => {
     }
 
     if (!user) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
 
     if (location.pathname.startsWith('/admin')) {
         const allowedRoles = ['owner', 'manager', 'admin', 'editor'];
         if (!allowedRoles.includes(user.role)) {
-            return <Navigate to="/" />;
+            return <Navigate to="/" replace />;
         }
     }
 

@@ -42,7 +42,7 @@ const Footer = () => {
 
                     {/* Categories Section */}
                     <div className="space-y-8">
-                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-900 border-b border-royal-red/10 pb-4 inline-block">Collections</h4>
+                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-900 border-b border-royal-red/10 pb-4 inline-block">Categories</h4>
                         <ul className="space-y-4">
                             {categories?.slice(0, 4).map(cat => (
                                 <FooterLink
@@ -52,11 +52,7 @@ const Footer = () => {
                                 />
                             ))}
                             {(!categories || categories.length === 0) && (
-                                <>
-                                    <FooterLink to="/shop" text="Divine Idols" />
-                                    <FooterLink to="/shop" text="Festive Decor" />
-                                    <FooterLink to="/shop" text="Luxury Sweets" />
-                                </>
+                                <li className="text-sm text-gray-400 italic">No categories found</li>
                             )}
                         </ul>
                     </div>
@@ -69,7 +65,7 @@ const Footer = () => {
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
                                     <Phone size={16} />
                                 </div>
-                                <span className="text-sm text-gray-600 font-medium">+91 98765 43210</span>
+                                <span className="text-sm text-gray-600 font-medium">[Phone Number]</span>
                             </li>
                             <li className="flex gap-4 items-start group">
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
@@ -81,7 +77,7 @@ const Footer = () => {
                                 <div className="p-2.5 bg-royal-red/5 rounded-xl text-royal-red group-hover:bg-royal-red group-hover:text-white transition-all">
                                     <MapPin size={16} />
                                 </div>
-                                <span className="text-sm text-gray-600 font-medium">Jaipur, Rajasthan, India</span>
+                                <span className="text-sm text-gray-600 font-medium">[Address]</span>
                             </li>
                         </ul>
                     </div>

@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Gift, Eye, EyeOff } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/slices/authSlice';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
     const [formData, setFormData] = useState({ identifier: '', password: '' });
+    const [captchaToken, setCaptchaToken] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -14,9 +16,9 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             if (user.role === 'owner') {
-                navigate('/admin');
+                navigate('/admin', { replace: true });
             } else {
-                navigate('/');
+                navigate('/', { replace: true });
             }
         }
     }, [user, navigate]);
@@ -25,9 +27,17 @@ const Login = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleCaptchaChange = (token) => {
+        setCaptchaToken(token);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(loginUser(formData));
+        if (!captchaToken) {
+            alert("Please verify that you are not a robot.");
+            return;
+        }
+        dispatch(loginUser({ ...formData, captchaToken }));
     };
 
     return (
@@ -101,6 +111,13 @@ const Login = () => {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <ReCAPTCHA
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // Test key
+                                onChange={handleCaptchaChange}
+                            />
                         </div>
 
                         <div className="flex items-center justify-between">

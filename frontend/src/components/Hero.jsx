@@ -20,16 +20,11 @@ const Hero = ({ banners = [] }) => {
     const nextBanner = () => setCurrentIndex((prev) => (prev + 1) % banners.length);
     const prevBanner = () => setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
 
-    const currentBanner = banners[currentIndex] || {
-        imageUrl: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2000&auto=format&fit=crop",
-        title: "Namaste, Elevate Your Gifting.",
-        description: "Curated handcrafted treasures, divine idols, and premium delicacies designed to make every celebration truly royal.",
-        badge: "Festive Collection 2026",
-        offer: "50%",
-        offerTitle: "Royal Winter Sale"
-    };
+    const currentBanner = banners[currentIndex];
+
+    if (!currentBanner) return null;
     return (
-        <div className="relative bg-white pt-20 overflow-hidden">
+        <div className="relative bg-white pt-28 overflow-hidden">
             {/* Full Width Banner Slider */}
             <div className="relative w-full aspect-[21/9] md:aspect-[3/1] lg:h-[75vh] overflow-hidden">
                 <AnimatePresence mode="wait">
@@ -98,17 +93,11 @@ const Hero = ({ banners = [] }) => {
                             </div>
 
                             <h1 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 leading-[1.1]">
-                                Namaste, Elevate <br />
-                                <span className="text-royal-red italic font-medium">Your</span> Gifting Experience
-                                <span className="relative inline-block ml-4">
-                                    <svg className="absolute -bottom-2 left-0 w-full h-3 text-royal-gold/30" viewBox="0 0 100 10" preserveAspectRatio="none">
-                                        <path d="M0 5 Q 25 0, 50 5 T 100 5" stroke="currentColor" strokeWidth="4" fill="transparent" />
-                                    </svg>
-                                </span>
+                                {currentBanner.title || "Elevate Your Gifting"}
                             </h1>
 
                             <p className="text-lg text-gray-600 max-w-lg leading-relaxed font-light">
-                                Curated handcrafted treasures, divine idols, and premium delicacies designed to make every celebration truly royal. Discover the art of premium gifting.
+                                {currentBanner.description || "Discover the art of premium gifting."}
                             </p>
                         </motion.div>
 

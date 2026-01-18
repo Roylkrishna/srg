@@ -70,10 +70,25 @@ exports.signup = async (req, res, next) => {
     }
 };
 
+const axios = require('axios');
+
 exports.login = async (req, res, next) => {
-    const { identifier, password } = req.body; // Identifier can be email or username
+    const { identifier, password, captchaToken } = req.body; // Identifier can be email or username
 
     try {
+        // Verify Captcha
+        if (!captchaToken) {
+            return next({ statusCode: 400, message: "Captcha token is missing" });
+        }
+
+        const secretKey = process.env.RECAPTCHA_SECRET_KEY || "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // Use Test Key if env missing
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
+
+        const captchaResponse = await axios.post(verifyUrl);
+        if (!captchaResponse.data.success) {
+            return next({ statusCode: 400, message: "Captcha verification failed" });
+        }
+
         const validUser = await User.findOne({
             $or: [{ email: identifier }, { username: identifier }]
         });

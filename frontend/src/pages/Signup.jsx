@@ -16,7 +16,7 @@ const Signup = () => {
     const suggestions = ['gift_lover', 'gift_master_23', 'shree_rama_fan']; // Still mock for now, can be connected to API later
 
     useEffect(() => {
-        if (user) navigate('/dashboard');
+        if (user) navigate('/dashboard', { replace: true });
     }, [user, navigate]);
 
     const handleChange = (e) => {

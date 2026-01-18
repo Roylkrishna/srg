@@ -21,6 +21,7 @@ import PrivateRoute from './components/PrivateRoute';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from './redux/slices/authSlice';
+import { fetchAllCategories } from './redux/slices/categorySlice';
 
 // Helper to scroll to top on route change
 function ScrollToTop() {
@@ -39,6 +40,7 @@ const AuthWrapper = ({ children }) => {
 
   useEffect(() => {
     dispatch(checkAuth());
+    dispatch(fetchAllCategories());
 
     // Listen for logout in other tabs
     const handleStorageChange = (e) => {
