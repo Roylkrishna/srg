@@ -83,6 +83,8 @@ exports.getCaptcha = (req, res) => {
     res.cookie('captcha', captcha.text, {
         httpOnly: true,
         signed: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 10 * 60 * 1000 // 10 minutes
     });
 
@@ -99,7 +101,15 @@ exports.login = async (req, res, next) => {
         }
 
         const signedCookie = req.signedCookies.captcha;
-        if (!signedCookie || signedCookie !== captchaToken) {
+
+        console.log("Debug Captcha:", {
+            cookie: signedCookie,
+            input: captchaToken,
+            cookies: req.cookies,
+            signedCookies: req.signedCookies
+        });
+
+        if (!signedCookie || signedCookie.toLowerCase() !== captchaToken.toLowerCase()) {
             return next({ statusCode: 400, message: "Invalid captcha. Please try again." });
         }
 
