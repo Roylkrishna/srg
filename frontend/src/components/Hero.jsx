@@ -24,9 +24,9 @@ const Hero = ({ banners = [] }) => {
 
     if (!currentBanner) return null;
     return (
-        <div className="relative bg-white pt-28 overflow-hidden">
+        <div className="relative bg-white pt-20 md:pt-28 overflow-hidden">
             {/* Full Width Banner Slider */}
-            <div className="relative w-full h-[50vh] md:h-auto md:aspect-[2.5/1] lg:h-[75vh] overflow-hidden">
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[2.5/1] lg:h-[75vh] h-auto overflow-hidden">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`banner-${currentIndex}`}
@@ -47,23 +47,23 @@ const Hero = ({ banners = [] }) => {
                 {/* Navigation Arrows */}
                 {banners.length > 1 && (
                     <div className="absolute inset-0 flex items-center justify-between px-4 md:px-10 z-20 pointer-events-none">
-                        <button onClick={prevBanner} className="p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
-                            <ChevronLeft size={24} />
+                        <button onClick={prevBanner} className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
+                            <ChevronLeft size={20} className="md:w-6 md:h-6" />
                         </button>
-                        <button onClick={nextBanner} className="p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
-                            <ChevronRight size={24} />
+                        <button onClick={nextBanner} className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
+                            <ChevronRight size={20} className="md:w-6 md:h-6" />
                         </button>
                     </div>
                 )}
 
                 {/* Pagination Dots */}
                 {banners.length > 1 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+                    <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
                         {banners.map((_, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setCurrentIndex(idx)}
-                                className={`h-2 transition-all rounded-full ${currentIndex === idx ? 'w-10 bg-royal-red shadow-lg shadow-red-500/50' : 'w-2 bg-white/50 backdrop-blur-sm'}`}
+                                className={`h-1.5 md:h-2 transition-all rounded-full ${currentIndex === idx ? 'w-8 md:w-10 bg-royal-red shadow-lg shadow-red-500/50' : 'w-1.5 md:w-2 bg-white/50 backdrop-blur-sm'}`}
                             />
                         ))}
                     </div>

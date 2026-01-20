@@ -73,7 +73,11 @@ const ImageUploader = ({
     const startCamera = async () => {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 4096 },
+                    height: { ideal: 2160 }
+                }
             });
             setStream(mediaStream);
             setMode('camera');
@@ -98,11 +102,9 @@ const ImageUploader = ({
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
-        const dataUrl = canvas.toDataURL('image/jpeg');
+        const dataUrl = canvas.toDataURL('image/jpeg', 1.0); // Highest quality 1.0
 
-        // Calculate approximate size in bytes
-        const sizeInBytes = 4 * Math.ceil((dataUrl.length / 3)) * 0.5624896334383812; // Approximation
-        // Simplest: (dataUrl.length * (3/4))
+        // Calculate approximate size in bytes (Base64 length * 0.75)
         const approxBytes = dataUrl.length * (3 / 4);
 
         if (approxBytes > 500 * 1024) {
@@ -141,23 +143,27 @@ const ImageUploader = ({
             // 1. Get Blob from Canvas
             const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
 
-            // 2. Compress
-            const options = {
-                maxSizeMB: 0.48, // slightly less than 0.5 to be safe
-                maxWidthOrHeight: 1200, // Reasonable max dimension
-                useWebWorker: true,
-                fileType: "image/jpeg"
-            };
+            let finalBlob = croppedBlob;
 
-            let compressedFile = await imageCompression(croppedBlob, options);
+            // 2. Compress ONLY if > 500KB
+            if (croppedBlob.size > 500 * 1024) {
+                const options = {
+                    maxSizeMB: 0.48,
+                    maxWidthOrHeight: 1600, // Increased for better detail
+                    useWebWorker: true,
+                    fileType: "image/jpeg",
+                    initialQuality: 0.9
+                };
+                finalBlob = await imageCompression(croppedBlob, options);
+            }
 
-            // Force file name (Browser image compression might drop it)
-            const newFile = new File([compressedFile], `product-img-${Date.now()}.jpg`, {
+            // 3. Create File
+            const newFile = new File([finalBlob], `product-img-${Date.now()}.jpg`, {
                 type: 'image/jpeg',
                 lastModified: Date.now(),
             });
 
-            // 3. Update Parent
+            // 4. Update Parent
             onImagesChange([...newImages, newFile]);
 
             // 4. Reset
