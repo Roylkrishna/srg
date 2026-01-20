@@ -8,9 +8,9 @@ const Footer = () => {
     const { info: contact } = useSelector((state) => state.contact);
 
     return (
-        <footer className="bg-white pt-24 pb-12 border-t border-gray-100">
+        <footer className="bg-white pt-12 md:pt-24 pb-8 md:pb-12 border-t border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 mb-12 md:mb-20">
 
                     {/* Brand Section */}
                     <div className="space-y-8">

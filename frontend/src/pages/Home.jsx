@@ -29,24 +29,24 @@ const Home = () => {
             <Navbar />
             <Hero banners={banners} />
             {/* Product Collection Section */}
-            <section id="product-collection" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
+            <section id="product-collection" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 lg:py-32">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-16 sm:mb-20"
+                    className="text-center mb-12 sm:mb-20"
                 >
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Our Collection</h2>
+                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Our Collection</h2>
                 </motion.div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-12">
                         {[...Array(4)].map((_, i) => (
                             <SkeletonProduct key={i} />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 lg:gap-12">
                         {products.map((product, index) => (
                             <motion.div
                                 key={product._id || product.id}

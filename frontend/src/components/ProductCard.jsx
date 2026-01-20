@@ -78,7 +78,7 @@ const ProductCard = ({ product }) => {
                 </AnimatePresence>
 
                 {/* Badge Overlay */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-3 left-3 md:top-4 md:left-4 flex flex-col gap-2">
                     {product.isNew && (
                         <span className="px-3 py-1 bg-royal-red text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
                             New
@@ -94,16 +94,16 @@ const ProductCard = ({ product }) => {
                 {/* Favorite Button */}
                 <button
                     onClick={handleWishlist}
-                    className={`absolute top-4 right-4 p-3 rounded-full shadow-2xl transition-all duration-300 transform ${isHovered ? 'scale-100 opacity-100' : 'scale-50 opacity-0'} ${isLiked ? 'bg-royal-red text-white' : 'glass-card text-gray-900'}`}
+                    className={`absolute top-3 right-3 md:top-4 md:right-4 p-2.5 md:p-3 rounded-full shadow-2xl transition-all duration-300 transform ${isHovered ? 'scale-100 opacity-100' : 'scale-50 opacity-0'} ${isLiked ? 'bg-royal-red text-white' : 'glass-card text-gray-900'}`}
                 >
                     <Heart size={16} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} />
                 </button>
 
                 {/* Bottom Action Bar */}
-                <div className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+                <div className={`absolute bottom-0 left-0 right-0 p-3 md:p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
                     <Link
                         to={`/product/${product._id}`}
-                        className="w-full bg-royal-black text-white py-3 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-xl hover:bg-royal-red transition-colors"
+                        className="w-full bg-royal-black text-white py-3 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-xl hover:bg-royal-red transition-colors"
                     >
                         Explore Now
                         <ArrowUpRight size={16} />
@@ -112,7 +112,7 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-4 md:p-6">
                 <div className="flex items-center gap-1.5 mb-3">
                     <div className="flex">
                         {[...Array(5)].map((_, i) => (

@@ -26,7 +26,7 @@ const Hero = ({ banners = [] }) => {
     return (
         <div className="relative bg-white pt-28 overflow-hidden">
             {/* Full Width Banner Slider */}
-            <div className="relative w-full aspect-[21/9] md:aspect-[3/1] lg:h-[75vh] overflow-hidden">
+            <div className="relative w-full h-[50vh] md:h-auto md:aspect-[2.5/1] lg:h-[75vh] overflow-hidden">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={`banner-${currentIndex}`}

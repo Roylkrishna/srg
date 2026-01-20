@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails, updateProduct } from '../redux/slices/productSlice';
 import { fetchAllCategories } from '../redux/slices/categorySlice';
 import { Gift, ArrowLeft, Save, Loader2 } from 'lucide-react';
+import ImageUploader from '../components/ImageUploader';
 
 const ProductEdit = () => {
     const { id } = useParams();
@@ -22,8 +23,6 @@ const ProductEdit = () => {
         existingImages: [], // URLs from backend
         newImages: [] // File objects
     });
-    const [previews, setPreviews] = useState([]); // Previews for new images
-
     useEffect(() => {
         if (!user || (user.role !== 'owner' && user.role !== 'manager' && user.role !== 'admin' && user.role !== 'editor')) {
             navigate('/login');
@@ -62,49 +61,6 @@ const ProductEdit = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
-
-        // Validate file size (Max 500KB)
-        const invalidFiles = files.filter(file => file.size > 500 * 1024);
-        if (invalidFiles.length > 0) {
-            alert(`One or more images exceed the 500KB limit:\n${invalidFiles.map(f => f.name).join('\n')}`);
-            e.target.value = ''; // Reset input
-            return;
-        }
-
-        const totalImages = formData.existingImages.length + formData.newImages.length + files.length;
-
-        if (totalImages > 5) {
-            alert("You can only have up to 5 images per product.");
-            e.target.value = ''; // Reset input
-            return;
-        }
-
-        const newPreviews = files.map(file => URL.createObjectURL(file));
-        setFormData({ ...formData, newImages: [...formData.newImages, ...files] });
-        setPreviews([...previews, ...newPreviews]);
-        e.target.value = ''; // Reset input to allow selecting more
-    };
-
-    const removeExistingImage = (index) => {
-        const updated = [...formData.existingImages];
-        updated.splice(index, 1);
-        setFormData({ ...formData, existingImages: updated });
-    };
-
-    const removeNewImage = (index) => {
-        const updatedFiles = [...formData.newImages];
-        updatedFiles.splice(index, 1);
-
-        const updatedPreviews = [...previews];
-        URL.revokeObjectURL(updatedPreviews[index]); // Cleanup
-        updatedPreviews.splice(index, 1);
-
-        setFormData({ ...formData, newImages: updatedFiles });
-        setPreviews(updatedPreviews);
     };
 
     const handleSubmit = async (e) => {
@@ -202,13 +158,13 @@ const ProductEdit = () => {
                 </div>
             </nav>
 
-            <div className="max-w-4xl mx-auto p-6 lg:p-12">
-                <div className="mb-8 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+            <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-12">
+                <div className="mb-6 md:mb-8 flex items-center justify-between">
+                    <div className="flex items-center gap-3 md:gap-4">
                         <button onClick={() => navigate('/admin')} className="p-2 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-red-600">
-                            <ArrowLeft size={24} />
+                            <ArrowLeft size={20} className="md:w-6 md:h-6" />
                         </button>
-                        <h1 className="text-3xl font-serif font-bold text-gray-900">Edit Product</h1>
+                        <h1 className="text-xl md:text-3xl font-serif font-bold text-gray-900">Edit Product</h1>
                     </div>
                     <button
                         onClick={handleSubmit}
@@ -228,7 +184,7 @@ const ProductEdit = () => {
                 )}
 
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                    <div className="p-8 space-y-8">
+                    <div className="p-5 md:p-8 space-y-6 md:space-y-8">
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
@@ -293,49 +249,17 @@ const ProductEdit = () => {
                             />
                         </div>
 
-                        {/* Images */}
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-semibold text-gray-700 ml-1">Product Images (Max 5)</label>
-                                <span className="text-xs text-gray-500">{formData.existingImages.length + formData.newImages.length}/5 images</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-4">
-                                {/* Existing Images */}
-                                {formData.existingImages.map((img, i) => (
-                                    <div key={`existing-${i}`} className="aspect-square bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group">
-                                        <img src={img} alt="" className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button type="button" onClick={() => removeExistingImage(i)} className="text-white text-xs font-bold bg-red-600 px-2 py-1 rounded">Remove</button>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {/* New Images Previews */}
-                                {previews.map((preview, i) => (
-                                    <div key={`new-${i}`} className="aspect-square bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative group">
-                                        <img src={preview} alt="" className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <button type="button" onClick={() => removeNewImage(i)} className="text-white text-xs font-bold bg-red-600 px-2 py-1 rounded">Remove</button>
-                                        </div>
-                                        <span className="absolute top-1 left-1 bg-blue-500 text-white text-[10px] px-1.5 rounded-full">New</span>
-                                    </div>
-                                ))}
-
-                                {/* Add Button */}
-                                {(formData.existingImages.length + formData.newImages.length) < 5 && (
-                                    <label className="aspect-square border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-500 transition-all cursor-pointer">
-                                        <Plus size={32} />
-                                        <span className="text-xs font-medium mt-2">Add Image</span>
-                                        <input
-                                            type="file"
-                                            multiple
-                                            accept="image/jpeg,image/png,image/jpg"
-                                            onChange={handleImageChange}
-                                            className="hidden"
-                                        />
-                                    </label>
-                                )}
-                            </div>
+                            <ImageUploader
+                                existingImages={formData.existingImages}
+                                newImages={formData.newImages}
+                                onImagesChange={(updatedNewFiles) => setFormData({ ...formData, newImages: updatedNewFiles })}
+                                onRemoveExisting={(index) => {
+                                    const updated = [...formData.existingImages];
+                                    updated.splice(index, 1);
+                                    setFormData({ ...formData, existingImages: updated });
+                                }}
+                            />
                         </div>
                     </div>
                 </div>

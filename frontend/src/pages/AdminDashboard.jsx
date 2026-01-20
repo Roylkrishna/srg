@@ -8,6 +8,7 @@ import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner }
 import { logoutUser } from '../redux/slices/authSlice';
 import { updateContact, fetchContact } from '../redux/slices/contactSlice';
 import { Link, useNavigate } from 'react-router-dom';
+import ImageUploader from '../components/ImageUploader';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState(localStorage.getItem('adminActiveTab') || 'products');
@@ -86,32 +87,7 @@ const AdminDashboard = () => {
         localStorage.setItem('adminActiveTab', activeTab);
     }, [dispatch, user, navigate, activeTab]);
 
-    const handleImageChange = (e) => {
-        const files = Array.from(e.target.files);
 
-        // Max 5 images
-        if (imageFiles.length + files.length > 5) {
-            alert("You can only upload up to 5 images.");
-            return;
-        }
-
-        // Validate file size (Max 500KB)
-        const invalidFiles = files.filter(file => file.size > 500 * 1024);
-        if (invalidFiles.length > 0) {
-            alert(`One or more images exceed the 500KB limit:\n${invalidFiles.map(f => f.name).join('\n')}`);
-            e.target.value = ''; // Reset input
-            return;
-        }
-
-        setImageFiles([...imageFiles, ...files]);
-        e.target.value = '';
-    };
-
-    const removeImage = (index) => {
-        const updated = [...imageFiles];
-        updated.splice(index, 1);
-        setImageFiles(updated);
-    };
 
     const handleAddProduct = (e) => {
         e.preventDefault();
@@ -229,13 +205,22 @@ const AdminDashboard = () => {
         return matchesSearch;
     });
 
+    // Mobile Sidebar State
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
             {/* Top Navbar */}
-            <nav className="bg-white border-b border-gray-200 sticky top-0 z-20">
+            <nav className="bg-white border-b border-gray-200 sticky top-0 z-30">
                 <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="p-2 -ml-2 text-gray-600 hover:text-red-600 md:hidden"
+                            >
+                                {sidebarOpen ? <XIcon size={24} /> : <LayoutDashboard size={24} />}
+                            </button>
                             <Link to="/" className="flex items-center gap-2 group">
                                 <div className="bg-red-600 p-2 rounded-full text-white">
                                     <Gift size={20} />
@@ -246,11 +231,11 @@ const AdminDashboard = () => {
                             </Link>
                         </div>
                         <div className="flex items-center gap-6">
-                            <Link to="/shop" className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
+                            <Link to="/shop" className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
                                 <ExternalLink size={16} />
                                 View Shop
                             </Link>
-                            <div className="h-8 w-px bg-gray-200"></div>
+                            <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
                             <div className="flex items-center gap-3">
                                 <div className="text-right hidden sm:block">
                                     <p className="text-sm font-bold text-gray-900">{user?.firstName} {user?.lastName}</p>
@@ -286,29 +271,40 @@ const AdminDashboard = () => {
                 </div>
             </nav>
 
-            <div className="flex flex-1">
+            <div className="flex flex-1 relative">
+                {/* Mobile Sidebar Overlay */}
+                {sidebarOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-10 md:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                    ></div>
+                )}
+
                 {/* Sidebar */}
-                <div className="w-64 bg-white border-r border-gray-200 hidden md:block">
-                    <nav className="mt-8 px-4 space-y-2">
-                        <button onClick={() => setActiveTab('products')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                <div className={`
+                    absolute inset-y-0 left-0 z-20 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out
+                    md:relative md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                `}>
+                    <nav className="h-full overflow-y-auto px-4 py-6 space-y-2">
+                        <button onClick={() => { setActiveTab('products'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Package size={20} /> Manage Products
                         </button>
-                        <button onClick={() => setActiveTab('categories')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                        <button onClick={() => { setActiveTab('categories'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Tags size={20} /> Product Categories
                         </button>
-                        <button onClick={() => setActiveTab('banners')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'banners' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                        <button onClick={() => { setActiveTab('banners'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'banners' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Layout size={20} /> Homepage Banners
                         </button>
                         {user?.role === 'owner' && (
                             <>
-                                <button onClick={() => setActiveTab('managers')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'managers' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                <button onClick={() => { setActiveTab('managers'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'managers' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                                     <ShieldCheck size={20} /> Manage Managers
                                 </button>
-                                <button onClick={() => setActiveTab('users')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                <button onClick={() => { setActiveTab('users'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                                     <Users size={20} /> All Users
                                 </button>
 
-                                <button onClick={() => setActiveTab('contact')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'contact' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                <button onClick={() => { setActiveTab('contact'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'contact' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                                     <MapPin size={20} /> Contact Settings
                                 </button>
                             </>
@@ -355,23 +351,12 @@ const AdminDashboard = () => {
                                     </div>
                                     <textarea placeholder="Description" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} className="border p-2 rounded-lg w-full outline-none focus:ring-1 focus:ring-red-500" required />
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase">Product Images (Max 5)</label>
-                                        <div className="flex gap-2 flex-wrap">
-                                            {imageFiles.map((file, i) => (
-                                                <div key={i} className="relative w-16 h-16 border rounded overflow-hidden group">
-                                                    <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
-                                                    <button type="button" onClick={() => removeImage(i)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Trash size={12} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            {imageFiles.length < 5 && (
-                                                <label className="w-16 h-16 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 hover:border-red-400 hover:text-red-600 cursor-pointer transition-colors">
-                                                    <Plus size={20} />
-                                                    <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
-                                                </label>
-                                            )}
-                                        </div>
+                                        <ImageUploader
+                                            existingImages={[]} // No existing images for new product
+                                            newImages={imageFiles}
+                                            onImagesChange={(updatedFiles) => setImageFiles(updatedFiles)}
+                                            onRemoveExisting={() => { }} // No op
+                                        />
                                     </div>
                                     <div className="flex justify-end gap-3">
                                         <button type="button" onClick={() => setIsAddMode(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">Cancel</button>
@@ -381,8 +366,8 @@ const AdminDashboard = () => {
                             )}
 
                             {/* Product Table */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                                <table className="w-full text-left">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+                                <table className="w-full text-left min-w-[800px]">
                                     <thead className="bg-gray-50 border-b border-gray-200">
                                         <tr>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
@@ -711,8 +696,8 @@ const AdminDashboard = () => {
                                 </div>
                             )}
 
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                                <table className="w-full text-left">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+                                <table className="w-full text-left min-w-[700px]">
                                     <thead className="bg-gray-50 border-b border-gray-200">
                                         <tr>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Manager</th>

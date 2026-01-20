@@ -219,10 +219,64 @@ const Navbar = () => {
             {isOpen && (
                 <div className="md:hidden glass-nav absolute w-full animate-in slide-in-from-top-4 duration-300 border-b border-gray-100/50">
                     <div className="px-4 py-8 space-y-6">
+                        {/* Mobile Search */}
+                        <div className="relative group/search">
+                            <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-gray-200 shadow-sm focus-within:border-royal-red focus-within:ring-2 focus-within:ring-royal-red/10 transition-all w-full">
+                                <Search className="text-gray-400" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Search treasures..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-sm text-gray-900 placeholder-gray-400 w-full font-medium"
+                                />
+                            </div>
+                            {/* Search Results in Mobile (Simplified) */}
+                            <AnimatePresence>
+                                {searchQuery.length >= 2 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute top-full mt-2 left-0 right-0 glass-card rounded-xl shadow-premium overflow-hidden z-[60] max-h-[60vh] overflow-y-auto"
+                                    >
+                                        <div className="p-2 divide-y divide-gray-50">
+                                            {searchLoading ? (
+                                                <div className="p-4 flex justify-center"><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-royal-red"></div></div>
+                                            ) : searchResults.length > 0 ? (
+                                                searchResults.map(product => (
+                                                    <Link
+                                                        key={product._id}
+                                                        to={`/product/${product._id}`}
+                                                        onClick={() => { setSearchQuery(''); setIsOpen(false); }}
+                                                        className="flex items-center gap-3 p-3 hover:bg-royal-red/5"
+                                                    >
+                                                        <div className="h-10 w-10 rounded-lg bg-gift-cream overflow-hidden flex-shrink-0">
+                                                            <img src={product.images?.[0] || product.image} alt={product.name} className="w-full h-full object-contain p-0.5" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold text-gray-900 truncate">{product.name}</p>
+                                                            <p className="text-[10px] text-gray-400 uppercase">{product.category?.name}</p>
+                                                        </div>
+                                                    </Link>
+                                                ))
+                                            ) : (
+                                                <div className="p-4 text-center text-xs text-gray-400">No treasures found</div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
                         {user && (
                             <div className="flex items-center gap-4 p-4 glass-card rounded-2xl">
-                                <div className="h-12 w-12 rounded-full gold-gradient shadow-lg flex items-center justify-center text-white font-bold text-lg">
-                                    {user?.firstName?.[0]}{user?.lastName?.[0]}
+                                <div className="h-12 w-12 rounded-full gold-gradient shadow-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden">
+                                    {user?.profilePicture ? (
+                                        <img src={user.profilePicture} alt="Profile" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <span>{user?.firstName?.[0]}{user?.lastName?.[0]}</span>
+                                    )}
                                 </div>
                                 <div>
                                     <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
@@ -230,6 +284,22 @@ const Navbar = () => {
                                 </div>
                             </div>
                         )}
+
+                        <div className="space-y-2">
+                            <Link to="/" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Home</Link>
+                            <button onClick={() => {
+                                setIsOpen(false);
+                                document.getElementById('product-collection')?.scrollIntoView({ behavior: 'smooth' });
+                            }} className="w-full text-left px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">
+                                Our Collection
+                            </button>
+                            {user && (
+                                <Link to="/wishlist" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Wishlist</Link>
+                            )}
+                            {user && user.role !== 'user' && (
+                                <Link to="/admin" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Admin Portal</Link>
+                            )}
+                        </div>
 
                         <div className="pt-6 border-t border-gray-100/50 flex flex-col gap-4">
                             {!user ? (
