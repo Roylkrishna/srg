@@ -14,7 +14,10 @@ api.interceptors.response.use(
             // Note: We avoid direct store import to prevent circular dependencies if possible,
             // or we use a custom event/redirect-logic.
             // For now, redirecting to login is a robust standard.
-            if (!window.location.pathname.includes('/login')) {
+            // Force logout on auth failure, but ignore the initial auth check
+            // which is expected to fail if the user is not logged in.
+            const isAuthCheck = error.config.url.endsWith('/auth/check');
+            if (!isAuthCheck && !window.location.pathname.includes('/login')) {
                 window.location.href = '/login';
             }
         }

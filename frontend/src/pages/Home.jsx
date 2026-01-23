@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/slices/productSlice';
 import { fetchBanners } from '../redux/slices/bannerSlice';
 import { fetchAllCategories } from '../redux/slices/categorySlice';
-import { fetchStats } from '../redux/slices/statsSlice';
+
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
@@ -21,7 +21,8 @@ const Home = () => {
         dispatch(fetchProducts({ select: '_id,name,price,description,image,images,rating,reviews,isNew,category' }));
         dispatch(fetchBanners());
         dispatch(fetchAllCategories());
-        dispatch(fetchStats());
+        dispatch(fetchAllCategories());
+        // dispatch(fetchStats()); // Removed as it likely requires auth and isn't used on Home
     }, [dispatch]);
 
     return (
