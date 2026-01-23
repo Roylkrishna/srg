@@ -25,6 +25,7 @@ const Signup = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (loading) return;
         dispatch(registerUser(formData));
     };
 

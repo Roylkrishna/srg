@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Gift, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -29,8 +29,13 @@ const Login = () => {
 
     const [captchaSvg, setCaptchaSvg] = useState('');
 
+    const captchaFetchedRef = useRef(false);
+
     useEffect(() => {
-        fetchCaptcha();
+        if (!captchaFetchedRef.current) {
+            fetchCaptcha();
+            captchaFetchedRef.current = true;
+        }
     }, []);
 
     const fetchCaptcha = async () => {
@@ -49,6 +54,7 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (loading) return;
         if (!captchaToken) {
             alert("Please enter the captcha.");
             return;
