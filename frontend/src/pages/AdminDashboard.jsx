@@ -31,7 +31,69 @@ const AdminDashboard = () => {
     });
     const [imageFiles, setImageFiles] = useState([]); // Store files for upload
 
-    // ... (lines 33-106)
+    // Contact Form State
+    const { info: contactInfo, updateSuccess } = useSelector((state) => state.contact);
+    const [contactForm, setContactForm] = useState({
+        phone: '', email: '', address: '', mapUrl: '', instagram: '', facebook: '', youtube: ''
+    });
+
+    useEffect(() => {
+        if (contactInfo) {
+            setContactForm(contactInfo);
+        }
+    }, [contactInfo]);
+
+    const handleUpdateContact = (e) => {
+        e.preventDefault();
+        dispatch(updateContact(contactForm));
+    };
+
+    const [newCategoryName, setNewCategoryName] = useState('');
+
+    const [newBanner, setNewBanner] = useState({
+        title: '', description: '', link: '', order: 0
+    });
+    const [bannerFile, setBannerFile] = useState(null);
+
+    const [newUserForm, setNewUserForm] = useState({
+        firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager'
+    });
+
+    // Sale Form State
+    const [saleForm, setSaleForm] = useState({
+        categoryId: '', productId: '', sellingPrice: '', quantity: 1
+    });
+    const [saleSearch, setSaleSearch] = useState('');
+    const [categorySearch, setCategorySearch] = useState('');
+
+    useEffect(() => {
+        const allowedRoles = ['owner', 'manager', 'admin', 'editor'];
+        if (!user || !allowedRoles.includes(user.role)) {
+            navigate('/login');
+            return;
+        }
+
+        // Fetch data based on active tab
+        if (activeTab === 'products') {
+            dispatch(fetchProducts());
+            dispatch(fetchAllCategories());
+        } else if (activeTab === 'categories') {
+            dispatch(fetchAllCategories());
+        } else if (activeTab === 'users' || activeTab === 'managers') {
+            dispatch(fetchAllUsers());
+        } else if (activeTab === 'banners') {
+            dispatch(fetchBanners());
+        } else if (activeTab === 'contact') {
+            dispatch(fetchContact());
+        } else if (activeTab === 'sales') {
+            dispatch(fetchProducts());
+            dispatch(fetchAllCategories());
+            dispatch(fetchSalesHistory());
+        }
+
+        // Persist tab choice
+        localStorage.setItem('adminActiveTab', activeTab);
+    }, [dispatch, user, navigate, activeTab]);
 
     const handleAddProduct = (e) => {
         e.preventDefault();
