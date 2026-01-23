@@ -17,12 +17,14 @@ const ProductEdit = () => {
     const [formData, setFormData] = useState({
         name: '',
         price: '',
+        purchasedPrice: '',
         category: '',
         description: '',
         quantityAvailable: '',
         existingImages: [], // URLs from backend
         newImages: [] // File objects
     });
+
     useEffect(() => {
         if (!user || (user.role !== 'owner' && user.role !== 'manager' && user.role !== 'admin' && user.role !== 'editor')) {
             navigate('/login');
@@ -33,7 +35,8 @@ const ProductEdit = () => {
         if (product) {
             setFormData({
                 name: product.name,
-                price: product.price,
+                price: product.price, // Selling Price
+                purchasedPrice: product.purchasedPrice || 0,
                 category: product.category?._id || product.category, // Handle populated category
                 description: product.description,
                 quantityAvailable: product.quantityAvailable,
@@ -45,6 +48,7 @@ const ProductEdit = () => {
                 setFormData({
                     name: data.name,
                     price: data.price,
+                    purchasedPrice: data.purchasedPrice || 0,
                     category: data.category?._id || data.category,
                     description: data.description,
                     quantityAvailable: data.quantityAvailable,
@@ -69,6 +73,7 @@ const ProductEdit = () => {
         const data = new FormData();
         data.append('name', formData.name);
         data.append('price', formData.price);
+        data.append('purchasedPrice', formData.purchasedPrice);
         data.append('category', formData.category);
         data.append('description', formData.description);
         data.append('quantityAvailable', formData.quantityAvailable);
@@ -81,27 +86,6 @@ const ProductEdit = () => {
         // Append new files
         formData.newImages.forEach(file => {
             data.append('images', file);
-        });
-
-        // Backend expects 'images' field for FILES in multer array('images')
-        // And we handle 'existingImages' or 'images' (text) in controller manually.
-        // My updated controller checks `req.body.images` for text. 
-        // Let's send existing ones as `images` text fields too?
-        // No, controller logic I wrote:
-        // `let existingImages = req.body.entryImages || [];` -> wait I wrote `entryImages` in comment but code used `req.body.images`.
-        // Let's double check controller logic. 
-        // "let currentImages = []; if (req.body.images) { ... }"
-        // So if I append 'images' with string, it goes to body.images.
-        // If I append 'images' with blob, it goes to req.files.
-        // This collision is handled by multer (files go to req.files, rest to body).
-        // So I can just use 'images' for EVERYTHING.
-
-        // Wait, safest is to match what I wrote or expected.
-        // In controller: "let currentImages = []; if (req.body.images) ..."
-        // So yes, I should send existing URLs as 'images'.
-
-        formData.existingImages.forEach(img => {
-            data.append('images', img);
         });
 
         try {
@@ -213,7 +197,18 @@ const ProductEdit = () => {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-gray-700 ml-1">Price (₹)</label>
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Purchased Price (₹)</label>
+                                <input
+                                    name="purchasedPrice"
+                                    type="number"
+                                    value={formData.purchasedPrice}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none font-medium"
+                                    placeholder="0"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Selling Price (₹)</label>
                                 <input
                                     name="price"
                                     type="number"
@@ -283,9 +278,5 @@ const ProductEdit = () => {
         </div>
     );
 };
-
-const Plus = ({ size }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-);
 
 export default ProductEdit;

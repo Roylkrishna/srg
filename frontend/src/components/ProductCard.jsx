@@ -126,35 +126,36 @@ const ProductCard = ({ product }) => {
             </div>
 
             {/* Content */}
-            <div className="p-4 md:p-6">
-                <div className="flex items-center gap-1.5 mb-3">
+            <div className="p-3 md:p-6">
+                <div className="flex items-center gap-1.5 mb-2 md:mb-3">
                     <div className="flex">
                         {[...Array(5)].map((_, i) => (
                             <Star
                                 key={i}
-                                size={12}
+                                size={10}
                                 className={i < product.rating ? "fill-royal-gold text-royal-gold" : "text-gray-200"}
                             />
                         ))}
                     </div>
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest hidden sm:inline">
                         {product.reviews} Reviews
                     </span>
+                    <span className="text-[9px] text-gray-400 font-bold sm:hidden">({product.reviews})</span>
                 </div>
 
                 <Link to={`/product/${product._id}`}>
-                    <h3 className="font-serif font-bold text-xl text-gray-900 mb-2 truncate group-hover:text-royal-red transition-colors">
+                    <h3 className="font-serif font-bold text-sm md:text-xl text-gray-900 mb-1 md:mb-2 truncate group-hover:text-royal-red transition-colors">
                         {product.name}
                     </h3>
                 </Link>
 
-                <p className="text-sm text-gray-500 mb-4 line-clamp-2 font-light leading-relaxed">
+                <p className="hidden md:block text-sm text-gray-500 mb-4 line-clamp-2 font-light leading-relaxed">
                     {product.description}
                 </p>
 
-                <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Price</span>
-                    <span className="text-2xl font-black text-gray-900">₹{product.price}</span>
+                <div className="flex flex-col mt-2 md:mt-0">
+                    <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest">Price</span>
+                    <span className="text-lg md:text-2xl font-black text-gray-900">₹{product.price}</span>
                 </div>
             </div>
         </motion.div>

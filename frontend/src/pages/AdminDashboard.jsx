@@ -27,78 +27,11 @@ const AdminDashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const [newProduct, setNewProduct] = useState({
-        name: '', price: '', category: '', description: '', quantityAvailable: 10, images: []
+        name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: []
     });
     const [imageFiles, setImageFiles] = useState([]); // Store files for upload
 
-    // Contact Form State
-    const { info: contactInfo, updateSuccess } = useSelector((state) => state.contact);
-    const [contactForm, setContactForm] = useState({
-        phone: '', email: '', address: '', mapUrl: '', instagram: '', facebook: '', youtube: ''
-    });
-
-    useEffect(() => {
-        if (contactInfo) {
-            setContactForm(contactInfo);
-        }
-    }, [contactInfo]);
-
-    const handleUpdateContact = (e) => {
-        e.preventDefault();
-        dispatch(updateContact(contactForm));
-    };
-
-    const [newCategoryName, setNewCategoryName] = useState('');
-
-    const [newBanner, setNewBanner] = useState({
-        title: '', description: '', link: '', order: 0
-    });
-    const [bannerFile, setBannerFile] = useState(null);
-
-    const [newUserForm, setNewUserForm] = useState({
-        firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager'
-    });
-
-    // Sale Form State
-    const [saleForm, setSaleForm] = useState({
-        categoryId: '', productId: '', sellingPrice: '', quantity: 1
-    });
-    const [saleSearch, setSaleSearch] = useState('');
-    const [categorySearch, setCategorySearch] = useState('');
-
-    useEffect(() => {
-        const allowedRoles = ['owner', 'manager', 'admin', 'editor'];
-        if (!user || !allowedRoles.includes(user.role)) {
-            navigate('/login');
-            return;
-        }
-
-        // Fetch data based on active tab
-        if (activeTab === 'products') {
-            dispatch(fetchProducts());
-            dispatch(fetchAllCategories());
-        } else if (activeTab === 'categories') {
-            dispatch(fetchAllCategories());
-        } else if (activeTab === 'users' || activeTab === 'managers') {
-            dispatch(fetchAllUsers());
-        } else if (activeTab === 'banners') {
-        } else if (activeTab === 'users' || activeTab === 'managers') {
-            dispatch(fetchAllUsers());
-        } else if (activeTab === 'banners') {
-            dispatch(fetchBanners());
-        } else if (activeTab === 'contact') {
-            dispatch(fetchContact());
-        } else if (activeTab === 'sales') {
-            dispatch(fetchProducts());
-            dispatch(fetchAllCategories());
-            dispatch(fetchSalesHistory());
-        }
-
-        // Persist tab choice
-        localStorage.setItem('adminActiveTab', activeTab);
-    }, [dispatch, user, navigate, activeTab]);
-
-
+    // ... (lines 33-106)
 
     const handleAddProduct = (e) => {
         e.preventDefault();
@@ -106,6 +39,7 @@ const AdminDashboard = () => {
         const formData = new FormData();
         formData.append('name', newProduct.name);
         formData.append('price', newProduct.price);
+        formData.append('purchasedPrice', newProduct.purchasedPrice);
         formData.append('category', newProduct.category);
         formData.append('description', newProduct.description);
         formData.append('quantityAvailable', newProduct.quantityAvailable);
@@ -116,7 +50,7 @@ const AdminDashboard = () => {
 
         dispatch(createProduct(formData)).then(() => {
             setIsAddMode(false);
-            setNewProduct({ name: '', price: '', category: '', description: '', quantityAvailable: 10, images: [] });
+            setNewProduct({ name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: [] });
             setImageFiles([]);
         }).catch(err => {
             alert("Failed to add product: " + err);
@@ -371,7 +305,10 @@ const AdminDashboard = () => {
                                 <form onSubmit={handleAddProduct} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <input placeholder="Name" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" required />
-                                        <input placeholder="Price" type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" required />
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <input placeholder="Purchased Price" type="number" value={newProduct.purchasedPrice} onChange={e => setNewProduct({ ...newProduct, purchasedPrice: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" />
+                                            <input placeholder="Selling Price" type="number" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" required />
+                                        </div>
                                         <select
                                             value={newProduct.category}
                                             onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}
@@ -407,7 +344,7 @@ const AdminDashboard = () => {
                                     <thead className="bg-gray-50 border-b border-gray-200">
                                         <tr>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
+                                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Selling Price</th>
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
                                             {user?.role === 'owner' && <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Last Edited By</th>}
                                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
