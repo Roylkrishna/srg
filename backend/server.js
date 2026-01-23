@@ -15,13 +15,17 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
+// Serve Static Files (placed before rate limiter to avoid blocking images)
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Security Headers
 app.use(helmet());
 
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: 300, // limit each IP to 300 requests per windowMs (approx 1 req/3s)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     skip: (req, res) => {
@@ -55,9 +59,7 @@ app.use(cors({
     credentials: true
 }));
 
-// Serve Static Files
-const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve Static Files - Moved above
 
 // Database Connection
 const connectDB = async () => {
