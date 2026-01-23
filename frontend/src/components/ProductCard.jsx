@@ -63,22 +63,24 @@ const ProductCard = ({ product }) => {
             className="group relative bg-white rounded-3xl overflow-hidden shadow-premium hover:shadow-2xl transition-all duration-500 border border-gray-100/50"
         >
             {/* Image Container */}
-            <div className="relative overflow-hidden aspect-[4/5] bg-gift-cream">
-                <AnimatePresence mode="wait">
-                    <motion.img
-                        key={currentImage}
-                        src={currentImage}
-                        alt={product.name}
-                        initial={{ opacity: 0, scale: 1.1 }}
-                        animate={{ opacity: 1, scale: isHovered ? 1.1 : 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="w-full h-full object-contain p-4"
-                    />
-                </AnimatePresence>
+            <div className="relative overflow-hidden aspect-[4/5] bg-gift-cream group-hover:bg-white transition-colors duration-500">
+                <Link to={`/product/${product._id}`} className="block w-full h-full">
+                    <AnimatePresence mode="wait">
+                        <motion.img
+                            key={currentImage}
+                            src={currentImage}
+                            alt={product.name}
+                            initial={{ opacity: 0, scale: 1.1 }}
+                            animate={{ opacity: 1, scale: isHovered ? 1.05 : 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="w-full h-full object-contain p-4 mix-blend-multiply"
+                        />
+                    </AnimatePresence>
+                </Link>
 
                 {/* Badge Overlay */}
-                <div className="absolute top-3 left-3 md:top-4 md:left-4 flex flex-col gap-2">
+                <div className="absolute top-3 left-3 md:top-4 md:left-4 flex flex-col gap-2 pointer-events-none">
                     {product.isNew && (
                         <span className="px-3 py-1 bg-royal-red text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
                             New
@@ -94,10 +96,22 @@ const ProductCard = ({ product }) => {
                 {/* Favorite Button */}
                 <button
                     onClick={handleWishlist}
-                    className={`absolute top-3 right-3 md:top-4 md:right-4 p-2.5 md:p-3 rounded-full shadow-2xl transition-all duration-300 transform ${isHovered ? 'scale-100 opacity-100' : 'scale-50 opacity-0'} ${isLiked ? 'bg-royal-red text-white' : 'glass-card text-gray-900'}`}
+                    className={`absolute top-3 right-3 md:top-4 md:right-4 p-2.5 md:p-3 rounded-full shadow-2xl transition-all duration-300 transform ${isLiked ? 'bg-royal-red text-white scale-100 opacity-100' : 'glass-card text-gray-900 md:scale-50 md:opacity-0 md:group-hover:scale-100 md:group-hover:opacity-100'}`}
                 >
                     <Heart size={16} fill={isLiked ? "currentColor" : "none"} strokeWidth={2.5} />
                 </button>
+
+                {/* Image Dots */}
+                {images.length > 1 && (
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                        {images.map((_, idx) => (
+                            <div
+                                key={idx}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-4 bg-royal-red' : 'w-1.5 bg-gray-300'}`}
+                            ></div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Bottom Action Bar */}
                 <div className={`absolute bottom-0 left-0 right-0 p-3 md:p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
@@ -128,9 +142,11 @@ const ProductCard = ({ product }) => {
                     </span>
                 </div>
 
-                <h3 className="font-serif font-bold text-xl text-gray-900 mb-2 truncate group-hover:text-royal-red transition-colors">
-                    {product.name}
-                </h3>
+                <Link to={`/product/${product._id}`}>
+                    <h3 className="font-serif font-bold text-xl text-gray-900 mb-2 truncate group-hover:text-royal-red transition-colors">
+                        {product.name}
+                    </h3>
+                </Link>
 
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2 font-light leading-relaxed">
                     {product.description}

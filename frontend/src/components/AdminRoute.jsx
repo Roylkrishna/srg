@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const PrivateRoute = ({ children }) => {
+const AdminRoute = ({ children }) => {
     const { user, loading, isAuthChecked } = useSelector((state) => state.auth);
 
     if (loading || !isAuthChecked) {
@@ -17,7 +17,12 @@ const PrivateRoute = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
 
+    const allowedRoles = ['owner', 'manager'];
+    if (!allowedRoles.includes(user.role)) {
+        return <Navigate to="/" replace />;
+    }
+
     return children;
 };
 
-export default PrivateRoute;
+export default AdminRoute;

@@ -39,8 +39,8 @@ exports.updateProfile = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
     try {
-        // Access Control: Allow if self OR if admin/manager/owner
-        const allowedRoles = ['owner', 'admin', 'manager', 'editor'];
+        // Access Control: Allow if self OR if manager/owner
+        const allowedRoles = ['owner', 'manager'];
         if (req.user.id !== req.params.id && !allowedRoles.includes(req.user.role)) {
             return next({ statusCode: 403, message: "You are not authorized to view this profile!" });
         }

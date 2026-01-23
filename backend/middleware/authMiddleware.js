@@ -26,11 +26,11 @@ exports.verifyToken = (req, res, next) => {
 };
 
 exports.verifyAdmin = (req, res, next) => {
-    const allowedRoles = ['owner', 'manager', 'admin', 'editor'];
+    const allowedRoles = ['owner', 'manager'];
     if (allowedRoles.includes(req.user.role)) {
         next();
     } else {
-        return next({ statusCode: 403, message: "You are not authorized! Admin/Manager only." });
+        return next({ statusCode: 403, message: "Access denied. Restricted to Owner or Manager only." });
     }
 };
 

@@ -17,6 +17,7 @@ import Footer from './components/Footer';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from './redux/slices/authSlice';
@@ -93,25 +94,25 @@ function App() {
             <Route
               path="/admin"
               element={
-                <PrivateRoute>
+                <AdminRoute>
                   <AdminDashboard />
-                </PrivateRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/admin/edit-product/:id"
               element={
-                <PrivateRoute>
+                <AdminRoute>
                   <ProductEdit />
-                </PrivateRoute>
+                </AdminRoute>
               }
             />
             <Route
               path="/admin/user/:id"
               element={
-                <PrivateRoute>
+                <AdminRoute>
                   <UserDetail />
-                </PrivateRoute>
+                </AdminRoute>
               }
             />
           </Routes>

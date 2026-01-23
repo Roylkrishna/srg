@@ -35,12 +35,12 @@ const Wishlist = () => {
         <div className="min-h-screen bg-gift-cream">
             <Navbar />
 
-            <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-serif font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
+            <div className="pt-20 md:pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                <div className="text-center mb-8 md:mb-12">
+                    <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2 md:mb-4 flex items-center justify-center gap-3">
                         <Heart className="text-red-600 fill-red-600" /> My Wishlist
                     </h1>
-                    <p className="text-gray-500">Your curated collection of favorites.</p>
+                    <p className="text-sm md:text-base text-gray-500">Your curated collection of favorites.</p>
                 </div>
 
                 {loading ? (
@@ -56,12 +56,12 @@ const Wishlist = () => {
                         <Heart size={48} className="mx-auto text-gray-300 mb-4" />
                         <h3 className="text-xl font-bold text-gray-900 mb-2">Your wishlist is empty</h3>
                         <p className="text-gray-500 mb-6">Start exploring our collection and save your favorites here!</p>
-                        <Link to="/shop" className="inline-block bg-red-600 text-white px-8 py-3 rounded-full font-bold hover:bg-red-700 transition-colors">
+                        <Link to="/" className="inline-block bg-red-600 text-white px-8 py-3 rounded-full font-bold hover:bg-red-700 transition-colors">
                             Start Shopping
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                         {wishlist.map(product => (
                             <ProductCard key={product._id} product={product} />
                         ))}
