@@ -58,12 +58,31 @@ export const searchProducts = createAsyncThunk('products/search', async (query, 
     }
 });
 
+export const recordSale = createAsyncThunk('products/recordSale', async (saleData, thunkAPI) => {
+    try {
+        const response = await api.post('/products/record-sale', saleData);
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const fetchSalesHistory = createAsyncThunk('products/fetchSalesHistory', async (_, thunkAPI) => {
+    try {
+        const response = await api.get('/products/sales/history');
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 const productSlice = createSlice({
     name: 'products',
     initialState: {
         items: [],
         searchResults: [],
         productDetails: null,
+        salesHistory: [],
         loading: false,
         searchLoading: false,
         error: null,
@@ -121,15 +140,21 @@ const productSlice = createSlice({
                 }
             })
             // Search
-            .addCase(searchProducts.pending, (state) => {
-                state.searchLoading = true;
-            })
-            .addCase(searchProducts.fulfilled, (state, action) => {
-                state.searchLoading = false;
-                state.searchResults = action.payload;
-            })
             .addCase(searchProducts.rejected, (state) => {
                 state.searchLoading = false;
+            })
+            // Record Sale
+            .addCase(recordSale.fulfilled, (state, action) => {
+                const updatedProduct = action.payload.updatedProduct;
+                const index = state.items.findIndex(item => item._id === updatedProduct._id);
+                if (index !== -1) {
+                    state.items[index] = updatedProduct;
+                }
+                state.salesHistory.unshift(action.payload.sale);
+            })
+            // Fetch Sales History
+            .addCase(fetchSalesHistory.fulfilled, (state, action) => {
+                state.salesHistory = action.payload;
             });
     }
 });

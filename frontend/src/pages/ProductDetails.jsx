@@ -99,7 +99,7 @@ const ProductDetails = () => {
                     <div className="lg:col-span-7 space-y-6">
                         <motion.div
                             layoutId={`product-image-${product._id}`}
-                            className="aspect-[4/5] rounded-[3rem] overflow-hidden bg-white relative border border-gray-100/50 shadow-premium"
+                            className="aspect-[4/5] rounded-3xl md:rounded-[3rem] overflow-hidden bg-white relative border border-gray-100/50 shadow-premium"
                         >
                             <AnimatePresence mode="wait">
                                 <motion.img
@@ -110,18 +110,18 @@ const ProductDetails = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.5 }}
-                                    className="w-full h-full object-contain p-12"
+                                    className="w-full h-full object-contain p-6 md:p-12"
                                 />
                             </AnimatePresence>
 
                             {/* Floating Badges */}
-                            <div className="absolute top-8 left-8 flex flex-col gap-3">
+                            <div className="absolute top-4 left-4 md:top-8 md:left-8 flex flex-col gap-2 md:gap-3">
                                 {product.isNew && (
-                                    <span className="px-5 py-2 bg-royal-red text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full shadow-2xl">
+                                    <span className="px-3 py-1.5 md:px-5 md:py-2 bg-royal-red text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full shadow-2xl">
                                         Rare Piece
                                     </span>
                                 )}
-                                <span className="px-5 py-2 glass-card text-royal-gold text-[10px] font-black uppercase tracking-[0.3em] rounded-full">
+                                <span className="px-3 py-1.5 md:px-5 md:py-2 glass-card text-royal-gold text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full">
                                     Handcrafted
                                 </span>
                             </div>
@@ -160,11 +160,11 @@ const ProductDetails = () => {
                                     </div>
                                     <span>{product.reviews || 0} Royal Reviews</span>
                                 </div>
-                                <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">
+                                <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">
                                     {product.name}
                                 </h1>
                                 <div className="flex items-baseline gap-4">
-                                    <span className="text-4xl font-black text-royal-red">₹{product.price}</span>
+                                    <span className="text-3xl md:text-4xl font-black text-royal-red">₹{product.price}</span>
                                     <span className="text-sm font-bold text-gray-400 line-through">₹{Math.floor(product.price * 1.2)}</span>
                                 </div>
                             </div>

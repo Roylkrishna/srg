@@ -32,8 +32,8 @@ const Signup = () => {
     return (
         <div className="min-h-screen flex bg-gift-cream">
             {/* Right Side - Image/Decor (Swapped for variety) */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8">
+                <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
                     <div className="text-center">
                         <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
                             <div className="bg-gift-red p-2 rounded-full text-white group-hover:bg-gift-dark-red transition-colors">
@@ -43,7 +43,7 @@ const Signup = () => {
                                 Shree Rama<span className="text-gift-red">.</span>
                             </span>
                         </Link>
-                        <h2 className="text-4xl font-serif font-bold text-gift-red">Create your account</h2>
+                        <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gift-red">Create account</h2>
                         <p className="mt-2 text-sm text-gray-600">
                             Already have an account? <Link to="/login" className="font-medium text-gift-red hover:underline">Sign in</Link>
                         </p>

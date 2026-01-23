@@ -221,8 +221,8 @@ const Navbar = () => {
                     <div className="px-4 py-8 space-y-6">
                         {/* Mobile Search */}
                         <div className="relative group/search">
-                            <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-gray-200 shadow-sm focus-within:border-royal-red focus-within:ring-2 focus-within:ring-royal-red/10 transition-all w-full">
-                                <Search className="text-gray-400" size={18} />
+                            <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-4 border border-gray-200 shadow-sm focus-within:border-royal-red focus-within:ring-2 focus-within:ring-royal-red/10 transition-all w-full">
+                                <Search className="text-gray-400" size={20} />
                                 <input
                                     type="text"
                                     placeholder="Search treasures..."
@@ -270,17 +270,19 @@ const Navbar = () => {
                         </div>
 
                         {user && (
-                            <div className="flex items-center gap-4 p-4 glass-card rounded-2xl">
-                                <div className="h-12 w-12 rounded-full gold-gradient shadow-lg flex items-center justify-center text-white font-bold text-lg overflow-hidden">
+                            <div className="flex items-center gap-4 p-5 glass-card rounded-2xl border border-white/50">
+                                <div className="h-14 w-14 rounded-full gold-gradient shadow-lg flex items-center justify-center text-white font-bold text-xl overflow-hidden border-2 border-white">
                                     {user?.profilePicture ? (
                                         <img src={user.profilePicture} alt="Profile" className="h-full w-full object-cover" />
                                     ) : (
-                                        <span>{user?.firstName?.[0]}{user?.lastName?.[0]}</span>
+                                        <div className="h-full w-full rounded-full bg-red-50 text-royal-red flex items-center justify-center font-bold text-lg uppercase">
+                                            {user?.firstName?.[0]}{user?.lastName?.[0]}
+                                        </div>
                                     )}
                                 </div>
-                                <div>
-                                    <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
-                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
+                                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                 </div>
                             </div>
                         )}
@@ -313,7 +315,7 @@ const Navbar = () => {
                             ) : (
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full bg-gray-50 text-royal-red py-4 rounded-xl text-center font-bold flex items-center justify-center gap-2"
+                                    className="w-full bg-red-50 text-royal-red py-4 rounded-2xl text-center font-bold flex items-center justify-center gap-2 border border-red-100/50"
                                 >
                                     <LogOut size={20} /> Sign Out
                                 </button>

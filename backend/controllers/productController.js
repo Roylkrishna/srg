@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const Activity = require('../models/Activity');
+const Sale = require('../models/Sale');
 
 exports.createProduct = async (req, res, next) => {
     try {
@@ -181,6 +182,71 @@ exports.getAllProducts = async (req, res, next) => {
 
         const products = await query;
         res.status(200).json(products);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.recordSale = async (req, res, next) => {
+    try {
+        const { productId, quantity, sellingPrice } = req.body;
+
+        if (!productId || !quantity || !sellingPrice) {
+            return res.status(400).json({ message: "Product, quantity, and price are required." });
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found." });
+        }
+
+        if (product.quantityAvailable < quantity) {
+            return res.status(400).json({ message: `Insufficient stock. Only ${product.quantityAvailable} available.` });
+        }
+
+        // update inventory
+        product.quantityAvailable -= quantity;
+        await product.save();
+
+        // create sale record
+        const sale = await Sale.create({
+            productId,
+            productName: product.name,
+            quantity,
+            sellingPrice,
+            totalAmount: quantity * sellingPrice,
+            recordedBy: req.user.id
+        });
+
+        // log activity
+        await Activity.create({
+            userId: req.user.id,
+            action: 'UPDATE', // Using UPDATE for general product changes, or we could add SALE to Activity later if needed
+            productId,
+            productName: product.name,
+            details: `Recorded sale: ${quantity} units at ₹${sellingPrice}`,
+            timestamp: new Date()
+        });
+
+        const populatedProduct = await Product.findById(productId).populate('category');
+
+        res.status(201).json({
+            message: "Sale recorded successfully",
+            sale,
+            updatedProduct: populatedProduct
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getSalesHistory = async (req, res, next) => {
+    try {
+        const sales = await Sale.find()
+            .populate('recordedBy', 'firstName lastName')
+            .sort({ createdAt: -1 })
+            .limit(50);
+        res.status(200).json(sales);
     } catch (error) {
         next(error);
     }

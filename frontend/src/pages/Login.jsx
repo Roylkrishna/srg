@@ -72,8 +72,8 @@ const Login = () => {
             </div>
 
             {/* Right Side - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8">
+                <div className="max-w-md w-full space-y-8 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
                     <div className="text-center">
                         <Link to="/" className="inline-flex items-center gap-2 mb-6 group">
                             <div className="bg-red-600 p-2 rounded-full text-white group-hover:bg-red-700 transition-colors">
@@ -83,9 +83,9 @@ const Login = () => {
                                 Shree Rama<span className="text-red-600">.</span>
                             </span>
                         </Link>
-                        <h2 className="text-3xl font-serif font-bold text-gray-900">Sign in to your account</h2>
+                        <h2 className="text-3xl font-serif font-bold text-gray-900">Sign in</h2>
                         <p className="mt-2 text-sm text-gray-600">
-                            Or <Link to="/signup" className="text-lg font-bold text-blue-600 hover:text-blue-800 underline">create a new account</Link>
+                            Or <Link to="/signup" className="font-bold text-blue-600 hover:text-blue-800 underline">create a new account</Link>
                         </p>
                     </div>
 

@@ -127,7 +127,7 @@ const Dashboard = () => {
         <div className="min-h-screen bg-gift-cream">
             <Navbar />
 
-            <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] flex flex-col md:flex-row">
 
                     {/* Sidebar */}
@@ -173,11 +173,11 @@ const Dashboard = () => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 p-8">
+                    <div className="flex-1 p-4 sm:p-8">
                         {activeTab === 'profile' && (
                             <div className="animate-fade-in-up">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-3xl font-serif font-bold text-gray-900">
+                                    <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">
                                         {isEditMode ? 'Edit Profile' : 'My Profile'}
                                     </h2>
                                     {!isEditMode && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, Users, BarChart3, Plus, Search, Edit, Trash2, Check, X as XIcon, Gift, User as UserIcon, LogOut, ExternalLink, Clock, UserPlus, ShieldAlert, ShieldCheck, UserX, Info, Tags, Trash, Image as ImageIcon, Layout, MapPin } from 'lucide-react';
+import { LayoutDashboard, Package, Users, BarChart3, Plus, Search, Edit, Trash2, Check, X as XIcon, Gift, User as UserIcon, LogOut, ExternalLink, Clock, UserPlus, ShieldAlert, ShieldCheck, UserX, Info, Tags, Trash, Image as ImageIcon, Layout, MapPin, ShoppingCart, History, IndianRupee } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts, createProduct, deleteProduct } from '../redux/slices/productSlice';
+import { fetchProducts, createProduct, deleteProduct, recordSale, fetchSalesHistory } from '../redux/slices/productSlice';
 import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus } from '../redux/slices/userSlice';
 import { fetchAllCategories, createCategory as addNewCategory, deleteCategory as removeCategory } from '../redux/slices/categorySlice';
 import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner } from '../redux/slices/bannerSlice';
@@ -14,7 +14,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState(localStorage.getItem('adminActiveTab') || 'products');
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { items: products, loading } = useSelector((state) => state.products);
+    const { items: products, salesHistory, loading } = useSelector((state) => state.products);
     const { users, loading: userLoading } = useSelector((state) => state.user);
     const { categories, loading: categoryLoading } = useSelector((state) => state.categories);
     const { banners, loading: bannerLoading } = useSelector((state) => state.banners);
@@ -59,6 +59,13 @@ const AdminDashboard = () => {
         firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager'
     });
 
+    // Sale Form State
+    const [saleForm, setSaleForm] = useState({
+        categoryId: '', productId: '', sellingPrice: '', quantity: 1
+    });
+    const [saleSearch, setSaleSearch] = useState('');
+    const [categorySearch, setCategorySearch] = useState('');
+
     useEffect(() => {
         const allowedRoles = ['owner', 'manager', 'admin', 'editor'];
         if (!user || !allowedRoles.includes(user.role)) {
@@ -81,6 +88,10 @@ const AdminDashboard = () => {
             dispatch(fetchBanners());
         } else if (activeTab === 'contact') {
             dispatch(fetchContact());
+        } else if (activeTab === 'sales') {
+            dispatch(fetchProducts());
+            dispatch(fetchAllCategories());
+            dispatch(fetchSalesHistory());
         }
 
         // Persist tab choice
@@ -181,6 +192,28 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleRecordSale = (e) => {
+        e.preventDefault();
+        if (!saleForm.productId || !saleForm.quantity || !saleForm.sellingPrice) {
+            return alert("Please fill all fields.");
+        }
+
+        dispatch(recordSale({
+            productId: saleForm.productId,
+            quantity: parseInt(saleForm.quantity),
+            sellingPrice: parseFloat(saleForm.sellingPrice)
+        })).then((res) => {
+            if (!res.error) {
+                alert("Sale recorded successfully!");
+                setSaleForm({ categoryId: '', productId: '', sellingPrice: '', quantity: 1 });
+                setSaleSearch('');
+                setCategorySearch('');
+            } else {
+                alert("Failed: " + res.payload);
+            }
+        });
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return 'Never';
         return new Date(dateString).toLocaleString('en-IN', {
@@ -231,7 +264,7 @@ const AdminDashboard = () => {
                             </Link>
                         </div>
                         <div className="flex items-center gap-6">
-                            <Link to="/shop" className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
+                            <Link to="/" className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
                                 <ExternalLink size={16} />
                                 View Shop
                             </Link>
@@ -292,6 +325,9 @@ const AdminDashboard = () => {
                         <button onClick={() => { setActiveTab('categories'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'categories' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Tags size={20} /> Product Categories
                         </button>
+                        <button onClick={() => { setActiveTab('sales'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'sales' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                            <ShoppingCart size={20} /> Record Sales
+                        </button>
                         <button onClick={() => { setActiveTab('banners'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'banners' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Layout size={20} /> Homepage Banners
                         </button>
@@ -317,7 +353,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 p-8 overflow-auto">
+                <div className="flex-1 p-4 md:p-8 overflow-auto">
                     {activeTab === 'products' && (
                         <div className="space-y-6">
                             <div className="flex items-center justify-between">
@@ -909,6 +945,310 @@ const AdminDashboard = () => {
                                                 ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'sales' && (
+                        <div className="space-y-8">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Record Manual Sale</h2>
+                                <p className="text-gray-500 text-sm">Update inventory by recording offline or manual sales.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Sale Form */}
+                                <div className="lg:col-span-1">
+                                    <form onSubmit={handleRecordSale} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-6 sticky top-24">
+                                        <div className="space-y-4">
+                                            {/* Category Selection */}
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">1. Choose Category</label>
+                                                    {saleForm.categoryId && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSaleForm({ ...saleForm, categoryId: '', productId: '' });
+                                                                setCategorySearch('');
+                                                            }}
+                                                            className="text-xs font-bold text-red-600 hover:text-red-700 underline"
+                                                        >
+                                                            Change
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {saleForm.categoryId ? (
+                                                    <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-xl animate-in fade-in slide-in-from-left-2 duration-300">
+                                                        <div className="bg-red-600 p-1.5 rounded-lg text-white">
+                                                            <Tags size={16} />
+                                                        </div>
+                                                        <span className="font-bold text-gray-900">
+                                                            {saleForm.categoryId === 'all' ? 'All Categories' : categories.find(c => c._id === saleForm.categoryId)?.name}
+                                                        </span>
+                                                        <Check size={18} className="ml-auto text-red-600" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <div className="relative">
+                                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Search category..."
+                                                                value={categorySearch}
+                                                                onChange={e => setCategorySearch(e.target.value)}
+                                                                className="w-full border pl-10 pr-3 py-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500 transition-all border-gray-200"
+                                                            />
+                                                        </div>
+                                                        <div className="max-h-32 overflow-y-auto border border-gray-100 rounded-xl divide-y bg-gray-50/30">
+                                                            {'all categories'.includes(categorySearch.toLowerCase()) && (
+                                                                <div
+                                                                    onClick={() => {
+                                                                        setSaleForm({ ...saleForm, categoryId: 'all', productId: '' });
+                                                                        setCategorySearch('');
+                                                                    }}
+                                                                    className="p-3 cursor-pointer hover:bg-white hover:text-red-600 transition-all text-sm font-bold text-gray-500"
+                                                                >
+                                                                    All Categories
+                                                                </div>
+                                                            )}
+                                                            {categories
+                                                                .filter(cat => cat.name?.toLowerCase().includes(categorySearch.toLowerCase()))
+                                                                .map(cat => (
+                                                                    <div
+                                                                        key={cat._id}
+                                                                        onClick={() => {
+                                                                            setSaleForm({ ...saleForm, categoryId: cat._id, productId: '' });
+                                                                            setCategorySearch('');
+                                                                        }}
+                                                                        className="p-3 cursor-pointer hover:bg-white hover:text-red-600 transition-all text-sm font-medium text-gray-700 flex items-center justify-between group"
+                                                                    >
+                                                                        <span>{cat.name}</span>
+                                                                        <Plus size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                    </div>
+                                                                ))
+                                                            }
+                                                            {categories.length === 0 && !categoryLoading && (
+                                                                <div className="p-4 text-center text-xs text-gray-400 italic">No categories found in database.</div>
+                                                            )}
+                                                            {categories.length > 0 &&
+                                                                !('all categories'.includes(categorySearch.toLowerCase())) &&
+                                                                categories.filter(cat => cat.name?.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
+                                                                    <div className="p-4 text-center text-xs text-gray-400 italic">No matches for "{categorySearch}"</div>
+                                                                )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Product Selection */}
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">2. Search & Select Product</label>
+                                                    {saleForm.productId && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSaleForm({ ...saleForm, productId: '' });
+                                                                setSaleSearch('');
+                                                            }}
+                                                            className="text-xs font-bold text-red-600 hover:text-red-700 underline"
+                                                        >
+                                                            Change
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {saleForm.productId ? (
+                                                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-left-2 duration-300">
+                                                        <div className="h-12 w-12 rounded-xl bg-white border border-gray-100 p-1">
+                                                            <img
+                                                                src={products.find(p => p._id === saleForm.productId)?.images?.[0]}
+                                                                alt=""
+                                                                className="w-full h-full object-cover rounded-lg"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-sm font-black text-gray-900">{products.find(p => p._id === saleForm.productId)?.name}</p>
+                                                            <p className="text-xs text-green-600 font-bold">Stock Available: {products.find(p => p._id === saleForm.productId)?.quantityAvailable}</p>
+                                                        </div>
+                                                        <div className="bg-green-100 p-1.5 rounded-full text-green-600">
+                                                            <Check size={16} />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <div className="relative">
+                                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Search product name..."
+                                                                value={saleSearch}
+                                                                onChange={e => setSaleSearch(e.target.value)}
+                                                                className="w-full border pl-10 pr-3 py-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500 transition-all border-gray-200"
+                                                                disabled={!saleForm.categoryId}
+                                                            />
+                                                        </div>
+                                                        {saleForm.categoryId && (
+                                                            <div className="max-h-48 overflow-y-auto border border-gray-100 rounded-xl divide-y bg-gray-50/30">
+                                                                {products
+                                                                    .filter(p => {
+                                                                        if (saleForm.categoryId === 'all') return true;
+                                                                        const pCatId = typeof p.category === 'object' ? p.category?._id : p.category;
+                                                                        return pCatId === saleForm.categoryId;
+                                                                    })
+                                                                    .filter(p => p.name?.toLowerCase().includes(saleSearch.toLowerCase()))
+                                                                    .slice(0, 10)
+                                                                    .map(p => (
+                                                                        <div
+                                                                            key={p._id}
+                                                                            onClick={() => {
+                                                                                setSaleForm({ ...saleForm, productId: p._id, sellingPrice: p.price });
+                                                                            }}
+                                                                            className="p-3 cursor-pointer hover:bg-white group transition-all"
+                                                                        >
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="h-10 w-10 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
+                                                                                    {p.images?.[0] && <img src={p.images[0]} alt="" className="h-full w-full object-cover" />}
+                                                                                </div>
+                                                                                <div className="flex-1">
+                                                                                    <p className="text-sm font-bold text-gray-900 group-hover:text-red-600">{p.name}</p>
+                                                                                    <p className="text-[10px] text-gray-500">₹{p.price.toLocaleString()} • {p.quantityAvailable} in stock</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))
+                                                                }
+                                                                {products
+                                                                    .length === 0 && (
+                                                                        <div className="p-4 text-center text-xs text-gray-400 italic">No products found for "{saleSearch}"</div>
+                                                                    )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Pricing & Quantity */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">3. Selling Price</label>
+                                                    <div className="relative">
+                                                        <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                        <input
+                                                            type="number"
+                                                            value={saleForm.sellingPrice}
+                                                            onChange={e => setSaleForm({ ...saleForm, sellingPrice: e.target.value })}
+                                                            className="w-full border pl-10 pr-3 py-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                                                            placeholder="Price"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest">4. Quantity</label>
+                                                    <input
+                                                        type="number"
+                                                        value={saleForm.quantity}
+                                                        onChange={e => setSaleForm({ ...saleForm, quantity: e.target.value })}
+                                                        className="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500"
+                                                        placeholder="Qty"
+                                                        min="1"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Summary */}
+                                            {saleForm.productId && (
+                                                <div className="p-5 bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] text-white shadow-xl shadow-gray-200/50 animate-in zoom-in-95 duration-500">
+                                                    <div className="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+                                                        <span className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Quick Summary</span>
+                                                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div className="flex justify-between items-baseline">
+                                                            <span className="text-gray-400 text-sm">Amount</span>
+                                                            <span className="text-2xl font-black tabular-nums">₹{(saleForm.sellingPrice * saleForm.quantity).toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <div className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white/80">
+                                                                {saleForm.quantity} Items
+                                                            </div>
+                                                            <div className="bg-white/10 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white/80 line-clamp-1 max-w-[120px]">
+                                                                {products.find(p => p._id === saleForm.productId)?.name}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <button type="submit" className="w-full bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 shadow-xl shadow-red-100 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                            <ShoppingCart size={20} /> Complete Sale
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {/* Sales History */}
+                                <div className="lg:col-span-2 space-y-4">
+                                    <div className="flex items-center gap-2 text-gray-900">
+                                        <History size={20} />
+                                        <h3 className="text-lg font-bold">Recent Sales History</h3>
+                                    </div>
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-gray-50 border-b border-gray-100">
+                                                <tr>
+                                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Transaction Detail</th>
+                                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty</th>
+                                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Revenue</th>
+                                                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Handler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {salesHistory?.length === 0 ? (
+                                                    <tr><td colSpan="4" className="px-6 py-8 text-center text-gray-400 italic">No sales recorded yet.</td></tr>
+                                                ) : (
+                                                    salesHistory?.map(sale => (
+                                                        <tr key={sale._id} className="hover:bg-gray-50/50 transition-colors group">
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="h-8 w-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-red-600">
+                                                                        <ShoppingCart size={14} />
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-sm font-black text-gray-900 group-hover:text-red-600 transition-colors">{sale.productName}</span>
+                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{formatDate(sale.createdAt)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-gray-100 text-gray-600 border border-gray-200">
+                                                                    {sale.quantity} PCS
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className="text-sm font-black text-gray-900">₹{sale.totalAmount?.toLocaleString()}</span>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-6 w-6 rounded-full bg-red-50 flex items-center justify-center text-red-600 border border-red-100">
+                                                                        <UserIcon size={10} />
+                                                                    </div>
+                                                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
+                                                                        {sale.recordedBy?.firstName}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}

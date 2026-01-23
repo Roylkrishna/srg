@@ -21,7 +21,7 @@ const Footer = () => {
                             </span>
                         </Link>
                         <p className="text-gray-500 font-light leading-relaxed">
-                            Curating handcrafted treasures and premium gifting experiences inspired by India's rich heritage. Elevate every celebration with royal elegance.
+                            SR Gifts is your premier offline destination in Bhongaon for exquisite artificial gifts and premium treasures. Celebrating every occasion since 2021.
                         </p>
                         <div className="flex gap-4">
                             {contact?.instagram && <SocialIcon href={contact.instagram} icon={<Instagram size={18} />} />}
@@ -36,7 +36,7 @@ const Footer = () => {
                         <ul className="space-y-4">
                             <FooterLink to="/" text="Home" />
 
-                            <FooterLink to="/aboutus" text="Our Story" />
+                            <FooterLink to="/aboutus" text="About Us" />
                             <FooterLink to="/contact" text="Contact Us" />
                         </ul>
                     </div>
@@ -69,15 +69,19 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Bottom Bar */}
-                <div className="pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-xs text-gray-400 font-medium">
-                        © 2026 Shree Rama Gifts Center. All rights reserved.
-                    </p>
+                <div className="pt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
+                    <div className="space-y-2">
+                        <p className="text-xs text-gray-400 font-medium leading-relaxed max-w-[280px] md:max-w-none">
+                            © 2026 Shree Rama Gifts Center. All rights reserved.
+                        </p>
+                        <Link to="/privacy-policy" className="text-[10px] text-gray-300 hover:text-royal-red transition-colors font-medium">
+                            Privacy Policy
+                        </Link>
+                    </div>
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
                             <Heart size={14} className="text-royal-red animate-pulse" />
-                            Handcrafted with Love
+                            Make Every Celebration Special
                         </div>
                     </div>
                 </div>

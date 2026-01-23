@@ -11,6 +11,7 @@ import UserDetail from './pages/UserDetail';
 import Wishlist from './pages/Wishlist';
 import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 import Footer from './components/Footer';
 
@@ -79,6 +80,7 @@ function App() {
 
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
 

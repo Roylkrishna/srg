@@ -47,11 +47,11 @@ const Hero = ({ banners = [] }) => {
                 {/* Navigation Arrows */}
                 {banners.length > 1 && (
                     <div className="absolute inset-0 flex items-center justify-between px-4 md:px-10 z-20 pointer-events-none">
-                        <button onClick={prevBanner} className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
-                            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+                        <button onClick={prevBanner} className="p-3 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20 active:scale-90">
+                            <ChevronLeft size={24} className="md:w-6 md:h-6" />
                         </button>
-                        <button onClick={nextBanner} className="p-2 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20">
-                            <ChevronRight size={20} className="md:w-6 md:h-6" />
+                        <button onClick={nextBanner} className="p-3 md:p-3 bg-white/20 backdrop-blur-md rounded-full shadow-lg text-white hover:bg-royal-red hover:text-white transition-all pointer-events-auto border border-white/20 active:scale-90">
+                            <ChevronRight size={24} className="md:w-6 md:h-6" />
                         </button>
                     </div>
                 )}

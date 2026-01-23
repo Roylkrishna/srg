@@ -11,10 +11,10 @@ const AboutUs = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-16 space-y-4"
+                    className="text-center mb-12 md:mb-16 space-y-4"
                 >
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold text-gray-900">Our Story</h1>
-                    <p className="text-royal-red font-bold tracking-widest uppercase text-sm">Shree Rama Gifts - A Legacy of Excellence</p>
+                    <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold text-gray-900">About Us</h1>
+                    <p className="text-royal-red font-bold tracking-widest uppercase text-sm">SR Gifts - Your Premier Gifting Destination</p>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -23,12 +23,12 @@ const AboutUs = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="space-y-6"
                     >
-                        <h2 className="text-3xl font-serif font-bold text-gray-900">Crafting Royal Moments Since 2020</h2>
+                        <h2 className="text-3xl font-serif font-bold text-gray-900">A Trusted Offline Store Since 2021</h2>
                         <p className="text-gray-600 leading-relaxed font-light">
-                            At Shree Rama Gifts, we believe that every gift tells a story. Our journey began with a simple passion for preserving the rich heritage of Indian craftsmanship and bringing it to the modern doorstep.
+                            Welcome to SR Gifts, Bhongaon's favorite destination for exquisite artificial gifts and premium treasures. Our journey began in 2021 with a simple mission: to bring joy and elegance to every celebration through a curated selection of thoughtful gifts.
                         </p>
                         <p className="text-gray-600 leading-relaxed font-light">
-                            We curate the finest handcrafted treasures, divine idols, and premium delicacies from across the country, ensuring that every piece resonates with the royal elegance your loved ones deserve.
+                            As a dedicated offline shop, we pride ourselves on providing a personal touch, ensuring that every customer finds the perfect gift for their loved ones. From home decor to festive specials, we help you make every moment memorable.
                         </p>
 
                         <div className="grid grid-cols-3 gap-6 pt-8">
@@ -56,7 +56,7 @@ const AboutUs = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="relative rounded-[3rem] overflow-hidden aspect-square shadow-premium"
+                        className="relative rounded-3xl md:rounded-[3rem] overflow-hidden aspect-square shadow-premium"
                     >
                         <img
                             src="https://images.unsplash.com/photo-1513519245088-0e12902e35ca?q=80&w=1000&auto=format&fit=crop"

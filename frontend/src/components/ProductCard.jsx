@@ -114,7 +114,7 @@ const ProductCard = ({ product }) => {
                 )}
 
                 {/* Bottom Action Bar */}
-                <div className={`absolute bottom-0 left-0 right-0 p-3 md:p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+                <div className={`absolute bottom-0 left-0 right-0 p-3 md:p-4 transition-all duration-500 transform ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full md:translate-y-full opacity-100 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100'} lg:translate-y-full lg:opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 block md:hidden lg:block`}>
                     <Link
                         to={`/product/${product._id}`}
                         className="w-full bg-royal-black text-white py-3 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-xl hover:bg-royal-red transition-colors"
