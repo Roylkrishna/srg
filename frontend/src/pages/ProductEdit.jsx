@@ -56,7 +56,7 @@ const ProductEdit = () => {
                     newImages: []
                 });
             }).catch(() => {
-                navigate('/admin');
+                navigate('/admin-secure-access-7x24');
             });
         }
 
@@ -91,7 +91,7 @@ const ProductEdit = () => {
         try {
             await dispatch(updateProduct({ id, data })).unwrap();
             alert("Product updated successfully!");
-            navigate('/admin');
+            navigate('/admin-secure-access-7x24');
         } catch (err) {
             alert("Failed to update product: " + err);
         }
@@ -112,7 +112,7 @@ const ProductEdit = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <Link to="/admin" className="flex items-center gap-2 group">
+                            <Link to="/admin-secure-access-7x24" className="flex items-center gap-2 group">
                                 <div className="bg-red-600 p-2 rounded-full text-white">
                                     <Gift size={20} />
                                 </div>
@@ -145,7 +145,7 @@ const ProductEdit = () => {
             <div className="max-w-4xl mx-auto p-4 md:p-6 lg:p-12">
                 <div className="mb-6 md:mb-8 flex items-center justify-between">
                     <div className="flex items-center gap-3 md:gap-4">
-                        <button onClick={() => navigate('/admin')} className="p-2 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-red-600">
+                        <button onClick={() => navigate('/admin-secure-access-7x24')} className="p-2 hover:bg-white rounded-full transition-colors text-gray-600 hover:text-red-600">
                             <ArrowLeft size={20} className="md:w-6 md:h-6" />
                         </button>
                         <h1 className="text-xl md:text-3xl font-serif font-bold text-gray-900">Edit Product</h1>
@@ -261,7 +261,7 @@ const ProductEdit = () => {
 
                 <div className="mt-8 flex justify-end gap-4">
                     <button
-                        onClick={() => navigate('/admin')}
+                        onClick={() => navigate('/admin-secure-access-7x24')}
                         className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-white transition-colors font-medium"
                     >
                         Discard Changes

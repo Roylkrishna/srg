@@ -38,7 +38,7 @@ const UserDetail = () => {
         if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
             const result = await dispatch(deleteUser(id));
             if (deleteUser.fulfilled.match(result)) {
-                navigate('/admin');
+                navigate('/admin-secure-access-7x24');
             }
         }
     };
@@ -62,7 +62,7 @@ const UserDetail = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
             <Info className="w-16 h-16 text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900">{error || "User Not Found"}</h2>
-            <button onClick={() => navigate('/admin')} className="mt-4 text-red-600 hover:underline flex items-center gap-2">
+            <button onClick={() => navigate('/admin-secure-access-7x24')} className="mt-4 text-red-600 hover:underline flex items-center gap-2">
                 <ArrowLeft size={20} /> Back to Dashboard
             </button>
         </div>
@@ -74,7 +74,7 @@ const UserDetail = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <button
-                        onClick={() => navigate('/admin')}
+                        onClick={() => navigate('/admin-secure-access-7x24')}
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition-colors w-fit"
                     >
                         <ArrowLeft size={20} /> Back to Dashboard

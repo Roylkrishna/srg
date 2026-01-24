@@ -186,7 +186,7 @@ const Navbar = () => {
                                             <DropdownLink to="/dashboard" onClick={() => setDropdownOpen(false)} icon={<User size={16} />} text="Profile" />
                                             <DropdownLink to="/wishlist" onClick={() => setDropdownOpen(false)} icon={<Heart size={16} />} text="Wishlist" />
                                             {(user.role === 'owner' || user.role === 'manager') && (
-                                                <DropdownLink to="/admin" onClick={() => setDropdownOpen(false)} icon={<Shield size={16} />} text="Admin Portal" />
+                                                <DropdownLink to="/admin-secure-access-7x24" onClick={() => setDropdownOpen(false)} icon={<Shield size={16} />} text="Admin Portal" />
                                             )}
                                         </div>
                                         <div className="h-px bg-gray-100/50 my-2"></div>
@@ -304,7 +304,7 @@ const Navbar = () => {
                                 <Link to="/wishlist" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Wishlist</Link>
                             )}
                             {user && (user.role === 'owner' || user.role === 'manager') && (
-                                <Link to="/admin" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Admin Portal</Link>
+                                <Link to="/admin-secure-access-7x24" onClick={() => setIsOpen(false)} className="block px-4 py-3 rounded-xl bg-white/50 hover:bg-white text-gray-700 font-medium">Admin Portal</Link>
                             )}
                         </div>
 

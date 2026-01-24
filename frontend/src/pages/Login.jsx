@@ -16,7 +16,7 @@ const Login = () => {
     useEffect(() => {
         if (user) {
             if (user.role === 'owner') {
-                navigate('/admin', { replace: true });
+                navigate('/admin-secure-access-7x24', { replace: true });
             } else {
                 navigate('/', { replace: true });
             }

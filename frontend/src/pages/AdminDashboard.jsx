@@ -463,7 +463,7 @@ const AdminDashboard = () => {
                                                     )}
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex justify-end gap-2">
-                                                            <Link to={`/admin/edit-product/${p._id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors">
+                                                            <Link to={`/admin-secure-access-7x24/edit-product/${p._id}`} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors">
                                                                 <Edit size={18} />
                                                             </Link>
                                                             <button onClick={() => handleDelete(p._id)} className="text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors">
@@ -774,7 +774,7 @@ const AdminDashboard = () => {
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex justify-end gap-1.5">
                                                                 <Link
-                                                                    to={`/admin/user/${u._id}`}
+                                                                    to={`/admin-secure-access-7x24/user/${u._id}`}
                                                                     title="View Details"
                                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                                 >

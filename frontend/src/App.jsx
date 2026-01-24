@@ -94,7 +94,7 @@ function App() {
               }
             />
             <Route
-              path="/admin"
+              path="/admin-secure-access-7x24"
               element={
                 <AdminRoute>
                   <AdminDashboard />
@@ -102,7 +102,7 @@ function App() {
               }
             />
             <Route
-              path="/admin/edit-product/:id"
+              path="/admin-secure-access-7x24/edit-product/:id"
               element={
                 <AdminRoute>
                   <ProductEdit />
@@ -110,7 +110,7 @@ function App() {
               }
             />
             <Route
-              path="/admin/user/:id"
+              path="/admin-secure-access-7x24/user/:id"
               element={
                 <AdminRoute>
                   <UserDetail />
