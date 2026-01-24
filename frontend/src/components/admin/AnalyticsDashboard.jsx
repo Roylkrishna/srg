@@ -45,13 +45,6 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                     </p>
                 </div>
 
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Analytics Overview</h2>
-                    <p className="text-gray-500 text-sm mt-1">
-                        Performance metrics and user engagement insights.
-                    </p>
-                </div>
-
                 {/* Time Range Selector */}
                 <div className="flex bg-gray-100 p-1 rounded-lg">
                     {[

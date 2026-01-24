@@ -140,6 +140,14 @@ const productSlice = createSlice({
                 }
             })
             // Search
+            .addCase(searchProducts.pending, (state) => {
+                state.searchLoading = true;
+                state.error = null;
+            })
+            .addCase(searchProducts.fulfilled, (state, action) => {
+                state.searchLoading = false;
+                state.searchResults = action.payload;
+            })
             .addCase(searchProducts.rejected, (state) => {
                 state.searchLoading = false;
             })

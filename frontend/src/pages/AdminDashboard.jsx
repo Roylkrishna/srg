@@ -92,9 +92,6 @@ const AdminDashboard = () => {
         } else if (activeTab === 'sales') {
             dispatch(fetchProducts());
             dispatch(fetchAllCategories());
-        } else if (activeTab === 'sales') {
-            dispatch(fetchProducts());
-            dispatch(fetchAllCategories());
             dispatch(fetchSalesHistory());
         } else if (activeTab === 'analytics') {
             dispatch(fetchAnalyticsDashboard(timeRange));
