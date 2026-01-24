@@ -3,9 +3,9 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area
 } from 'recharts';
-import { Package, Search, TrendingUp, AlertCircle } from 'lucide-react';
+import { Package, Search, TrendingUp, AlertCircle, Activity } from 'lucide-react';
 
-const AnalyticsDashboard = ({ data, loading }) => {
+const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => {
 
     // Memoize data for charts to prevent unnecessary calcs
     const chartData = useMemo(() => {
@@ -37,12 +37,32 @@ const AnalyticsDashboard = ({ data, loading }) => {
     return (
         <div className="p-8 space-y-8 animate-in fade-in duration-500">
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Analytics Overview</h2>
                     <p className="text-gray-500 text-sm mt-1">
-                        Performance metrics and user engagement insights (Last 30 Days)
+                        Performance metrics and user engagement insights.
                     </p>
+                </div>
+
+                {/* Time Range Selector */}
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                    {[
+                        { label: '7 Days', value: '7d' },
+                        { label: '30 Days', value: '30d' },
+                        { label: 'All Time', value: 'all' }
+                    ].map((range) => (
+                        <button
+                            key={range.value}
+                            onClick={() => onTimeRangeChange(range.value)}
+                            className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${timeRange === range.value
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                        >
+                            {range.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -143,7 +163,7 @@ const AnalyticsDashboard = ({ data, loading }) => {
                         <h3 className="font-bold text-gray-900">Top Search Queries</h3>
                     </div>
 
-                    <div className="h-[300px] w-full">
+                    <div className="h-[300px] w-full relative">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data.topSearches} layout="vertical" margin={{ left: 10, right: 30 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#E5E7EB" />
@@ -173,6 +193,74 @@ const AnalyticsDashboard = ({ data, loading }) => {
                                 <p className="text-sm italic">No search data collected yet</p>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {/* User Activity Log (New) */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2">
+                    <div className="flex items-center gap-2 mb-6">
+                        <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                            <Activity size={20} />
+                        </div>
+                        <h3 className="font-bold text-gray-900">Recent User Activity (Log)</h3>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                                    <th className="p-4">Time</th>
+                                    <th className="p-4">User</th>
+                                    <th className="p-4">Event</th>
+                                    <th className="p-4">Details</th>
+                                    <th className="p-4">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 text-sm">
+                                {data.recentActivity?.map((log, idx) => (
+                                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                                        <td className="p-4 text-gray-500 whitespace-nowrap">
+                                            {new Date(log.timestamp).toLocaleString()}
+                                        </td>
+                                        <td className="p-4 font-medium text-gray-900">
+                                            {log.userId ? (
+                                                <div className="flex flex-col">
+                                                    <span>{log.userId.firstName} {log.userId.lastName}</span>
+                                                    <span className="text-xs text-gray-400 font-normal">{log.userId.email}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 italic">Guest</span>
+                                            )}
+                                        </td>
+                                        <td className="p-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide
+                                                ${log.eventType === 'VIEW_PRODUCT' ? 'bg-blue-50 text-blue-600' :
+                                                    log.eventType === 'SEARCH' ? 'bg-orange-50 text-orange-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                {log.eventType.replace('_', ' ')}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-gray-600 max-w-xs truncate">
+                                            {log.eventType === 'VIEW_PRODUCT' && log.productId ? (
+                                                <span className="flex items-center gap-2">
+                                                    <img src={log.productId.image} className="w-6 h-6 rounded object-contain bg-gray-100" />
+                                                    {log.productId.name}
+                                                </span>
+                                            ) : log.eventType === 'SEARCH' ? (
+                                                `Query: "${log.metadata?.query}"`
+                                            ) : '-'}
+                                        </td>
+                                        <td className="p-4 font-mono text-xs text-gray-500">
+                                            {log.ipAddress || 'Unknown'}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {(!data.recentActivity || data.recentActivity.length === 0) && (
+                                    <tr>
+                                        <td colSpan="5" className="p-8 text-center text-gray-400 italic">No recent activity recorded</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

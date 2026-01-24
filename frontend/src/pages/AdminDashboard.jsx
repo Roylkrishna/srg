@@ -22,6 +22,7 @@ const AdminDashboard = () => {
     const { banners, loading: bannerLoading } = useSelector((state) => state.banners);
     const { dashboardData: analyticsData, loading: analyticsLoading } = useSelector((state) => state.analytics);
     const { user } = useSelector((state) => state.auth);
+    const [timeRange, setTimeRange] = useState('30d');
 
     // Form State
     const [isAddMode, setIsAddMode] = useState(false);
@@ -96,12 +97,12 @@ const AdminDashboard = () => {
             dispatch(fetchAllCategories());
             dispatch(fetchSalesHistory());
         } else if (activeTab === 'analytics') {
-            dispatch(fetchAnalyticsDashboard('30d'));
+            dispatch(fetchAnalyticsDashboard(timeRange));
         }
 
         // Persist tab choice
         localStorage.setItem('adminActiveTab', activeTab);
-    }, [dispatch, user, navigate, activeTab]);
+    }, [dispatch, user, navigate, activeTab, timeRange]);
 
     const handleAddProduct = (e) => {
         e.preventDefault();
@@ -1264,6 +1265,8 @@ const AdminDashboard = () => {
                         <AnalyticsDashboard
                             data={analyticsData}
                             loading={analyticsLoading}
+                            timeRange={timeRange}
+                            onTimeRangeChange={setTimeRange}
                         />
                     )}
                 </div>

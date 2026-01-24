@@ -99,10 +99,18 @@ exports.getDashboardStats = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
+        // 4. Recent Activity Logs (Last 50 events)
+        const recentActivity = await Analytics.find(dateFilter)
+            .sort({ timestamp: -1 })
+            .limit(50)
+            .populate('userId', 'firstName lastName email')
+            .populate('productId', 'name image');
+
         res.status(200).json({
             topProducts,
             topSearches,
-            viewsOverTime
+            viewsOverTime,
+            recentActivity
         });
     } catch (error) {
         console.error('Analytics Dashboard Error:', error);
