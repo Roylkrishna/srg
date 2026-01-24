@@ -23,6 +23,10 @@ const AnalyticsSchema = new mongoose.Schema({
     // VIEW_PRODUCT: { source: 'recommendation' }
 
     ipAddress: String,
+    location: {
+        lat: Number,
+        lng: Number
+    },
     userAgent: String,
     timestamp: {
         type: Date,

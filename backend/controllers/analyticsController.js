@@ -6,7 +6,7 @@ const Product = require('../models/Product');
 // @access  Public
 exports.logEvent = async (req, res) => {
     try {
-        const { eventType, productId, metadata } = req.body;
+        const { eventType, productId, metadata, location } = req.body;
 
         let userId = null;
         if (req.user) {
@@ -18,6 +18,7 @@ exports.logEvent = async (req, res) => {
             userId,
             productId,
             metadata,
+            location, // { lat: ..., lng: ... }
             ipAddress: req.ip,
             userAgent: req.get('User-Agent')
         });
@@ -99,18 +100,32 @@ exports.getDashboardStats = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
-        // 4. Recent Activity Logs (Last 50 events)
+        // 4. Active Users (Last 5 minutes)
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const activeUsersCount = (await Analytics.distinct('ipAddress', {
+            timestamp: { $gte: fiveMinutesAgo }
+        })).length;
+
+        // 5. Recent Activity Logs (Last 50 events)
         const recentActivity = await Analytics.find(dateFilter)
             .sort({ timestamp: -1 })
             .limit(50)
+            .limit(50)
             .populate('userId', 'firstName lastName email')
             .populate('productId', 'name image');
+
+        // 6. Totals
+        const totalViews = viewsOverTime.reduce((acc, curr) => acc + curr.count, 0);
+        const totalSearches = topSearches.reduce((acc, curr) => acc + curr.count, 0);
 
         res.status(200).json({
             topProducts,
             topSearches,
             viewsOverTime,
-            recentActivity
+            recentActivity,
+            activeUsers: activeUsersCount,
+            totalViews,
+            totalSearches
         });
     } catch (error) {
         console.error('Analytics Dashboard Error:', error);

@@ -3,7 +3,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area
 } from 'recharts';
-import { Package, Search, TrendingUp, AlertCircle, Activity } from 'lucide-react';
+import { Package, Search, TrendingUp, AlertCircle, Activity, Users } from 'lucide-react';
 
 const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => {
 
@@ -45,6 +45,13 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                     </p>
                 </div>
 
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Analytics Overview</h2>
+                    <p className="text-gray-500 text-sm mt-1">
+                        Performance metrics and user engagement insights.
+                    </p>
+                </div>
+
                 {/* Time Range Selector */}
                 <div className="flex bg-gray-100 p-1 rounded-lg">
                     {[
@@ -56,13 +63,55 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                             key={range.value}
                             onClick={() => onTimeRangeChange(range.value)}
                             className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${timeRange === range.value
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-900'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             {range.label}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            {/* KPI Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Total Views Card */}
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                            <TrendingUp size={20} />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500 font-medium">Total Views</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.totalViews || 0}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Total Searches Card */}
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <Search size={20} />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500 font-medium">Total Searches</p>
+                            <p className="text-2xl font-bold text-gray-900">{data.totalSearches || 0}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Active Users Card (Real-time) */}
+                <div className="bg-green-50 border border-green-100 p-4 rounded-xl flex items-center gap-3 animate-fade-in">
+                    <div className="bg-green-500 text-white p-2 rounded-lg animate-pulse">
+                        <Users size={20} />
+                    </div>
+                    <div>
+                        <p className="text-xs text-green-700 font-bold uppercase tracking-wide">Active Now (5m)</p>
+                        <p className="text-2xl font-black text-green-800 leading-none">
+                            {data.activeUsers || 0}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -250,7 +299,17 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                                             ) : '-'}
                                         </td>
                                         <td className="p-4 font-mono text-xs text-gray-500">
-                                            {log.ipAddress || 'Unknown'}
+                                            <div>{log.ipAddress || 'Unknown'}</div>
+                                            {log.location?.lat && (
+                                                <a
+                                                    href={`https://www.google.com/maps?q=${log.location.lat},${log.location.lng}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-[10px] text-blue-500 mt-1 hover:underline block"
+                                                >
+                                                    📍 {log.location.lat.toFixed(4)}, {log.location.lng.toFixed(4)}
+                                                </a>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

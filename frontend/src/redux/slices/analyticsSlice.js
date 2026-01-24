@@ -4,8 +4,28 @@ import api from '../../lib/api';
 // Async Thunks
 export const logAnalyticsEvent = createAsyncThunk('analytics/log', async (eventData, { rejectWithValue }) => {
     try {
-        // eventData: { eventType, productId, metadata }
-        await api.post('/analytics/log', eventData);
+        // Option 1: Basic Geolocation (Browser API)
+        // Note: Users must allow this permission.
+        let location = null;
+        try {
+            if ('geolocation' in navigator) {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+                });
+                location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+            }
+        } catch (geoError) {
+            // Permission denied or timeout - ignore
+            // console.warn("Geolocation skipped:", geoError);
+        }
+
+        // eventData with location
+        const payload = { ...eventData, location };
+
+        await api.post('/analytics/log', payload);
     } catch (error) {
         // Silent failure for analytics logging
         return rejectWithValue(error.response?.data?.message || 'Logging failed');
