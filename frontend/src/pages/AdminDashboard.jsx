@@ -7,6 +7,8 @@ import { fetchAllCategories, createCategory as addNewCategory, deleteCategory as
 import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner } from '../redux/slices/bannerSlice';
 import { logoutUser } from '../redux/slices/authSlice';
 import { updateContact, fetchContact } from '../redux/slices/contactSlice';
+import { fetchAnalyticsDashboard } from '../redux/slices/analyticsSlice';
+import AnalyticsDashboard from '../components/admin/AnalyticsDashboard';
 import { Link, useNavigate } from 'react-router-dom';
 import ImageUploader from '../components/ImageUploader';
 
@@ -18,6 +20,7 @@ const AdminDashboard = () => {
     const { users, loading: userLoading } = useSelector((state) => state.user);
     const { categories, loading: categoryLoading } = useSelector((state) => state.categories);
     const { banners, loading: bannerLoading } = useSelector((state) => state.banners);
+    const { dashboardData: analyticsData, loading: analyticsLoading } = useSelector((state) => state.analytics);
     const { user } = useSelector((state) => state.auth);
 
     // Form State
@@ -88,7 +91,12 @@ const AdminDashboard = () => {
         } else if (activeTab === 'sales') {
             dispatch(fetchProducts());
             dispatch(fetchAllCategories());
+        } else if (activeTab === 'sales') {
+            dispatch(fetchProducts());
+            dispatch(fetchAllCategories());
             dispatch(fetchSalesHistory());
+        } else if (activeTab === 'analytics') {
+            dispatch(fetchAnalyticsDashboard('30d'));
         }
 
         // Persist tab choice
@@ -341,7 +349,7 @@ const AdminDashboard = () => {
                                 </button>
                             </>
                         )}
-                        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                        <button onClick={() => { setActiveTab('analytics'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <BarChart3 size={20} /> Analytics
                         </button>
 
@@ -1250,6 +1258,13 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {activeTab === 'analytics' && (
+                        <AnalyticsDashboard
+                            data={analyticsData}
+                            loading={analyticsLoading}
+                        />
                     )}
                 </div>
             </div>

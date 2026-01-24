@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductDetails } from '../redux/slices/productSlice';
 import { toggleWishlistProduct } from '../redux/slices/userSlice';
+import { logAnalyticsEvent } from '../redux/slices/analyticsSlice';
 import Navbar from '../components/Navbar';
 import confetti from 'canvas-confetti';
 
@@ -22,6 +23,10 @@ const ProductDetails = () => {
     useEffect(() => {
         if (id && id !== 'undefined') {
             dispatch(fetchProductDetails(id));
+            dispatch(logAnalyticsEvent({
+                eventType: 'VIEW_PRODUCT',
+                productId: id
+            }));
         }
         window.scrollTo(0, 0);
     }, [dispatch, id]);

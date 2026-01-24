@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser } from '../redux/slices/authSlice';
 import { searchProducts, clearSearchResults } from '../redux/slices/productSlice';
+import { logAnalyticsEvent } from '../redux/slices/analyticsSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
@@ -47,6 +48,10 @@ const Navbar = () => {
         const timer = setTimeout(() => {
             if (searchQuery.length >= 2) {
                 dispatch(searchProducts(searchQuery));
+                dispatch(logAnalyticsEvent({
+                    eventType: 'SEARCH',
+                    metadata: { query: searchQuery }
+                }));
             } else {
                 dispatch(clearSearchResults());
             }

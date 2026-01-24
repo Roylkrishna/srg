@@ -6,6 +6,7 @@ import categoryReducer from './slices/categorySlice';
 import bannerReducer from './slices/bannerSlice';
 import statsReducer from './slices/statsSlice';
 import contactReducer from './slices/contactSlice';
+import analyticsReducer from './slices/analyticsSlice';
 
 export const store = configureStore({
     reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
         banners: bannerReducer,
         stats: statsReducer,
         contact: contactReducer,
+        analytics: analyticsReducer,
     },
 });
