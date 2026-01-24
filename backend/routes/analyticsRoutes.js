@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const analyticsController = require('../controllers/analyticsController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
 
 // Public route to log events (e.g. view product)
 // Note: We might want valid tokens if we want to track specific users, 
@@ -18,6 +18,6 @@ const { protect, admin } = require('../middleware/authMiddleware');
 router.post('/log', analyticsController.logEvent);
 
 // Admin only dashboard stats
-router.get('/dashboard', protect, admin, analyticsController.getDashboardStats);
+router.get('/dashboard', verifyToken, verifyAdmin, analyticsController.getDashboardStats);
 
 module.exports = router;
