@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Package, Settings, LogOut, Plus, Search, Filter, ChevronDown, Layout, Bell, Menu, X as XIcon, Image as ImageIcon, Trash2, Edit, Save, ArrowLeft, Upload, Users, ShieldCheck, DollarSign, TrendingUp, Calendar, MapPin, Check, BarChart3, UserPlus, Info, ShieldAlert, UserX, History, ShoppingCart, IndianRupee, Printer, Key } from 'lucide-react';
+import { User, Package, Settings, LogOut, Plus, Search, Filter, ChevronDown, Layout, LayoutDashboard, Bell, Menu, X as XIcon, Image as ImageIcon, Trash2, Edit, Save, ArrowLeft, Upload, Users, ShieldCheck, DollarSign, TrendingUp, Calendar, MapPin, Check, BarChart3, UserPlus, Info, ShieldAlert, UserX, History, ShoppingCart, IndianRupee, Printer, Key } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, deleteProduct, recordSale, fetchSalesHistory } from '../redux/slices/productSlice';
 import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus, adminResetPassword } from '../redux/slices/userSlice';
