@@ -21,7 +21,7 @@ const Footer = () => {
                             </span>
                         </Link>
                         <p className="text-gray-500 font-light leading-relaxed">
-                            SR Gifts is your premier offline destination in Bhongaon for exquisite artificial gifts and premium treasures. Celebrating every occasion since 2021.
+                            SR Gifts is your favorite offline destination in Bhongaon for exquisite artificial gifts and handpicked treasures. Celebrating every occasion since 2021.
                         </p>
                         <div className="flex gap-4">
                             {contact?.instagram && <SocialIcon href={contact.instagram} icon={<Instagram size={18} />} />}

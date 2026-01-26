@@ -15,6 +15,19 @@ const ProductDetails = () => {
     const { productDetails: product, loading, error } = useSelector((state) => state.products);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const images = product?.images && product.images.length > 0 ? product.images : (product?.image ? [product.image] : []);
+
+    useEffect(() => {
+        if (!images.length || images.length <= 1 || isHovered) return;
+
+        const interval = setInterval(() => {
+            setSelectedImage((prev) => (prev + 1) % images.length);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [images.length, isHovered]);
 
     const { user } = useSelector(state => state.auth);
     const userProfile = useSelector(state => state.user.profile);
@@ -66,7 +79,7 @@ const ProductDetails = () => {
     }
 
     const isLiked = currentUser?.likedProducts?.includes(product._id);
-    const images = product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []);
+    // Images declaration moved up for auto-scroll logic
 
     const handleWishlist = () => {
         if (!currentUser) return alert("Please login first");
@@ -104,7 +117,9 @@ const ProductDetails = () => {
                     <div className="lg:col-span-7 space-y-6">
                         <motion.div
                             layoutId={`product-image-${product._id}`}
-                            className="aspect-[4/5] rounded-3xl md:rounded-[3rem] overflow-hidden bg-white relative border border-gray-100/50 shadow-premium"
+                            className="aspect-[4/5] rounded-3xl md:rounded-[3rem] overflow-hidden bg-white relative border border-gray-100/50 shadow-premium group"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
                         >
                             <AnimatePresence mode="wait">
                                 <motion.img
@@ -138,7 +153,7 @@ const ProductDetails = () => {
                                     <motion.button
                                         key={idx}
                                         whileHover={{ y: -5 }}
-                                        onClick={() => setSelectedImage(idx)}
+                                        onClick={() => { setSelectedImage(idx); setIsHovered(true); }} // Pause on manual selection
                                         className={`aspect-square rounded-2xl overflow-hidden bg-white cursor-pointer border-2 transition-all p-2 ${idx === selectedImage ? 'border-royal-red shadow-lg' : 'border-gray-100 hover:border-royal-gold'}`}
                                     >
                                         <img src={img} alt="Thumbnail" className="w-full h-full object-contain" />
