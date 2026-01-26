@@ -246,6 +246,7 @@ const AdminDashboard = () => {
 
     // Mobile Sidebar State
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -337,13 +338,17 @@ const AdminDashboard = () => {
                         <button onClick={() => { setActiveTab('banners'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'banners' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                             <Layout size={20} /> Homepage Banners
                         </button>
+
+                        {(user?.role === 'owner' || user?.role === 'manager') && (
+                            <button onClick={() => { setActiveTab('users'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                <Users size={20} /> All Users
+                            </button>
+                        )}
+
                         {user?.role === 'owner' && (
                             <>
                                 <button onClick={() => { setActiveTab('managers'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'managers' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                                     <ShieldCheck size={20} /> Manage Managers
-                                </button>
-                                <button onClick={() => { setActiveTab('users'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
-                                    <Users size={20} /> All Users
                                 </button>
 
                                 <button onClick={() => { setActiveTab('contact'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'contact' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
