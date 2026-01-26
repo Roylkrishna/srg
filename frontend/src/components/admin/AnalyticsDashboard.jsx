@@ -4,6 +4,7 @@ import {
     AreaChart, Area
 } from 'recharts';
 import { Package, Search, TrendingUp, AlertCircle, Activity, Users } from 'lucide-react';
+import ActivityMap from './ActivityMap';
 
 const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => {
 
@@ -245,6 +246,12 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                             <Activity size={20} />
                         </div>
                         <h3 className="font-bold text-gray-900">Recent User Activity (Log)</h3>
+                    </div>
+
+
+                    {/* Live Map Visualization */}
+                    <div className="mb-8">
+                        <ActivityMap activityData={data.recentActivity} />
                     </div>
 
                     <div className="overflow-x-auto">
