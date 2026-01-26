@@ -49,6 +49,24 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, thunkAPI
     }
 });
 
+export const forgotPassword = createAsyncThunk('auth/forgotPassword', async (identifier, thunkAPI) => {
+    try {
+        const response = await api.post('/auth/forgot-password', { identifier });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const resetPassword = createAsyncThunk('auth/resetPassword', async (data, thunkAPI) => {
+    try {
+        const response = await api.post('/auth/reset-password', data);
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 // Slice
 const authSlice = createSlice({
     name: 'auth',

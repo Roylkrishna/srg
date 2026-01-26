@@ -49,7 +49,9 @@ const userSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+    resetPasswordOTP: String,
+    resetPasswordExpires: Date
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

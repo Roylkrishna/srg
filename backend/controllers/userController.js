@@ -208,3 +208,46 @@ exports.getWishlist = async (req, res, next) => {
     }
 };
 
+
+exports.adminResetPassword = async (req, res, next) => {
+    try {
+        if (req.user.role !== 'owner') {
+            return next({ statusCode: 403, message: "Only owners can reset user passwords!" });
+        }
+
+        const { userId, newPassword } = req.body;
+
+        if (!userId || !newPassword) {
+            return next({ statusCode: 400, message: "User ID and new password are required!" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.changePassword = async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) return next({ statusCode: 404, message: "User not found!" });
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return next({ statusCode: 400, message: "Incorrect old password!" });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        next(error);
+    }
+};

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import { User, Package, Heart, LogOut, Camera, Mail, Phone, MapPin, Calendar, Edit3, Clock, ExternalLink, Search } from 'lucide-react';
+import { User, Package, Heart, LogOut, Camera, Mail, Phone, MapPin, Calendar, Edit3, Clock, ExternalLink, Search, Key } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateUserProfile, fetchManagerActivity } from '../redux/slices/userSlice';
+import { updateUserProfile, fetchManagerActivity, changePassword } from '../redux/slices/userSlice';
 import { logoutUser } from '../redux/slices/authSlice';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -29,6 +29,12 @@ const Dashboard = () => {
         state: '',
         zip: '',
         profilePictureFile: null // New state for file
+    });
+
+    const [passwordForm, setPasswordForm] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
     });
 
     const fileInputRef = React.useRef(null);
@@ -118,6 +124,21 @@ const Dashboard = () => {
         dispatch(updateUserProfile({ id: user._id, data: submissionData }));
     };
 
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            alert("New passwords do not match!");
+            return;
+        }
+        try {
+            await dispatch(changePassword({ oldPassword: passwordForm.oldPassword, newPassword: passwordForm.newPassword })).unwrap();
+            alert("Password changed successfully!");
+            setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error) {
+            alert(error);
+        }
+    };
+
     const handleLogout = () => {
         dispatch(logoutUser());
         navigate('/');
@@ -165,6 +186,9 @@ const Dashboard = () => {
                             </button>
                             <button onClick={() => setActiveTab('wishlist')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'wishlist' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}>
                                 <Heart size={20} /> Wishlist
+                            </button>
+                            <button onClick={() => setActiveTab('security')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${activeTab === 'security' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-600 hover:bg-white hover:text-gray-900'}`}>
+                                <Key size={20} /> Security
                             </button>
                             <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-all mt-8">
                                 <LogOut size={20} /> Sign Out
@@ -407,6 +431,51 @@ const Dashboard = () => {
                                         </button>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'security' && (
+                            <div className="animate-fade-in-up">
+                                <h2 className="text-xl font-bold mb-6">Security Settings</h2>
+                                <div className="bg-white p-8 rounded-3xl border border-gray-100 max-w-xl">
+                                    <form onSubmit={handlePasswordChange} className="space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Current Password</label>
+                                            <input
+                                                type="password"
+                                                value={passwordForm.oldPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">New Password</label>
+                                            <input
+                                                type="password"
+                                                value={passwordForm.newPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Confirm New Password</label>
+                                            <input
+                                                type="password"
+                                                value={passwordForm.confirmPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                                required
+                                                minLength={6}
+                                            />
+                                        </div>
+                                        <button type="submit" className="w-full py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-100">
+                                            Update Password
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         )}
                     </div>

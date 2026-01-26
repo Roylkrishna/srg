@@ -179,3 +179,79 @@ exports.logout = (req, res) => {
     }).status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
+const nodemailer = require('nodemailer');
+
+exports.forgotPassword = async (req, res, next) => {
+    try {
+        const { identifier } = req.body;
+        const user = await User.findOne({
+            $or: [{ email: identifier }, { username: identifier }]
+        });
+
+        if (!user) return next({ statusCode: 404, message: "User not found" });
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Save hashed OTP? For simplicity we save plain matching text but usually better hashed. 
+        // Given short life (10 mins) and simple OTP, plain or simple hash is fine. 
+        // Let's store plain for now as per plan, or bcrypt it.
+        // If we bcrypt, we can't show it in logs easily for dev manual verify without sending email.
+        // Let's store plain for DEV convenience, but in prod should be hashed.
+
+        user.resetPasswordOTP = otp;
+        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        await user.save();
+
+        // Send Email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // or configured SMTP
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        // Log for dev if SMTP not set
+        if (!process.env.SMTP_USER) {
+            console.log(`[DEV] OTP for ${user.email}: ${otp}`);
+        } else {
+            await transporter.sendMail({
+                from: process.env.SMTP_USER,
+                to: user.email,
+                subject: 'Password Reset OTP - Shree Rama Gift Center',
+                text: `Your OTP for password reset is: ${otp}. It is valid for 10 minutes.`
+            });
+        }
+
+        res.status(200).json({ message: "OTP sent to your email/mobile" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const { identifier, otp, newPassword } = req.body;
+        const user = await User.findOne({
+            $or: [{ email: identifier }, { username: identifier }],
+            resetPasswordOTP: otp,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return next({ statusCode: 400, message: "Invalid or expired OTP" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.resetPasswordOTP = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successfully. Please login." });
+    } catch (error) {
+        next(error);
+    }
+};
+

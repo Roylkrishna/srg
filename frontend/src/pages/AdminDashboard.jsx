@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Package, Users, BarChart3, Plus, Search, Edit, Trash2, Check, X as XIcon, Gift, User as UserIcon, LogOut, ExternalLink, Clock, UserPlus, ShieldAlert, ShieldCheck, UserX, Info, Tags, Trash, Image as ImageIcon, Layout, MapPin, ShoppingCart, History, IndianRupee } from 'lucide-react';
+import { User, Package, Settings, LogOut, Plus, Search, Filter, ChevronDown, Layout, Bell, Menu, X as XIcon, Image as ImageIcon, Trash2, Edit, Save, ArrowLeft, Upload, Users, ShieldCheck, DollarSign, TrendingUp, Calendar, MapPin, Check, BarChart3, UserPlus, Info, ShieldAlert, UserX, History, ShoppingCart, IndianRupee, Printer, Key } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, deleteProduct, recordSale, fetchSalesHistory } from '../redux/slices/productSlice';
-import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus } from '../redux/slices/userSlice';
+import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus, adminResetPassword } from '../redux/slices/userSlice';
 import { fetchAllCategories, createCategory as addNewCategory, deleteCategory as removeCategory } from '../redux/slices/categorySlice';
 import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner } from '../redux/slices/bannerSlice';
 import { logoutUser } from '../redux/slices/authSlice';
@@ -62,6 +62,10 @@ const AdminDashboard = () => {
     const [newUserForm, setNewUserForm] = useState({
         firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager'
     });
+
+    // Password Reset State
+    const [resetPasswordModal, setResetPasswordModal] = useState({ isOpen: false, userId: null, userName: '' });
+    const [resetNewPassword, setResetNewPassword] = useState('');
 
     // Sale Form State
     const [saleForm, setSaleForm] = useState({
@@ -251,7 +255,7 @@ const AdminDashboard = () => {
                     <div className="flex justify-between h-16">
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                onClick={toggleSidebar}
                                 className="p-2 -ml-2 text-gray-600 hover:text-red-600 md:hidden"
                             >
                                 {sidebarOpen ? <XIcon size={24} /> : <LayoutDashboard size={24} />}
@@ -345,11 +349,11 @@ const AdminDashboard = () => {
                                 <button onClick={() => { setActiveTab('contact'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'contact' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
                                     <MapPin size={20} /> Contact Settings
                                 </button>
+                                <button onClick={() => { setActiveTab('analytics'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                    <BarChart3 size={20} /> Analytics
+                                </button>
                             </>
                         )}
-                        <button onClick={() => { setActiveTab('analytics'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50'}`}>
-                            <BarChart3 size={20} /> Analytics
-                        </button>
 
                     </nav>
                 </div>
@@ -737,6 +741,45 @@ const AdminDashboard = () => {
                                 </div>
                             )}
 
+                            {/* Password Reset Modal */}
+                            {resetPasswordModal.isOpen && (
+                                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
+                                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-red-50/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
+                                                    <Key size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>
+                                                    <p className="text-xs text-gray-500">For user: <span className="font-bold">{resetPasswordModal.userName}</span></p>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => setResetPasswordModal({ isOpen: false, userId: null, userName: '' })} className="text-gray-400 hover:text-gray-600 transition-colors"><XIcon /></button>
+                                        </div>
+                                        <form onSubmit={handleResetPassword} className="p-6 space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-gray-600 uppercase">New Password</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Enter new password"
+                                                    value={resetNewPassword}
+                                                    onChange={e => setResetNewPassword(e.target.value)}
+                                                    className="border border-gray-200 p-3 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none transition-all font-mono"
+                                                    required
+                                                    minLength={6}
+                                                />
+                                                <p className="text-[10px] text-gray-400">Must be at least 6 characters long.</p>
+                                            </div>
+                                            <div className="flex justify-end gap-3 pt-4">
+                                                <button type="button" onClick={() => setResetPasswordModal({ isOpen: false, userId: null, userName: '' })} className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                                                <button type="submit" className="bg-red-600 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-200 active:scale-95 transition-all">Reset Password</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
                                 <table className="w-full text-left min-w-[700px]">
                                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -790,6 +833,13 @@ const AdminDashboard = () => {
                                                                     className="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all"
                                                                 >
                                                                     <UserX size={20} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setResetPasswordModal({ isOpen: true, userId: u._id, userName: `${u.firstName} ${u.lastName}` })}
+                                                                    title="Reset Password"
+                                                                    className="text-gray-400 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-lg transition-all"
+                                                                >
+                                                                    <Key size={20} />
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -945,6 +995,13 @@ const AdminDashboard = () => {
                                                             >
                                                                 <Info size={14} /> Information
                                                             </Link>
+                                                            <button
+                                                                onClick={() => setResetPasswordModal({ isOpen: true, userId: u._id, userName: `${u.firstName} ${u.lastName}` })}
+                                                                title="Reset Password"
+                                                                className="text-gray-400 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-full transition-all inline-flex items-center justify-center ml-2 border border-gray-200"
+                                                            >
+                                                                <Key size={14} />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}

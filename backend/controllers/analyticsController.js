@@ -1,16 +1,31 @@
 const Analytics = require('../models/Analytics');
 const Product = require('../models/Product');
 
+const geoip = require('geoip-lite');
+
 // @desc    Log a user event
 // @route   POST /api/analytics/log
 // @access  Public
 exports.logEvent = async (req, res) => {
     try {
-        const { eventType, productId, metadata, location } = req.body;
+        const { eventType, productId, metadata } = req.body;
+        let { location } = req.body;
 
         let userId = null;
         if (req.user) {
             userId = req.user.id;
+        }
+
+        // Auto-detect location from IP if GPS permission denied/missing
+        if (!location) {
+            const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            const geo = geoip.lookup(ip);
+            if (geo && geo.ll) {
+                location = {
+                    lat: geo.ll[0],
+                    lng: geo.ll[1]
+                };
+            }
         }
 
         const analytics = await Analytics.create({

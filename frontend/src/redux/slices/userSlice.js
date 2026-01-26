@@ -107,6 +107,24 @@ export const toggleWishlistProduct = createAsyncThunk('user/toggleWishlist', asy
     }
 });
 
+export const adminResetPassword = createAsyncThunk('user/adminResetPassword', async ({ userId, newPassword }, thunkAPI) => {
+    try {
+        const response = await api.put('/users/admin-reset-password', { userId, newPassword });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const changePassword = createAsyncThunk('user/changePassword', async ({ oldPassword, newPassword }, thunkAPI) => {
+    try {
+        const response = await api.put('/users/change-password', { oldPassword, newPassword });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 const userSlice = createSlice({
     name: 'user',
     initialState: {
