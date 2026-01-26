@@ -109,12 +109,12 @@ exports.login = async (req, res, next) => {
             signedCookies: req.signedCookies
         });
 
+        // Clear captcha cookie immediately to prevent reuse
+        res.clearCookie('captcha');
+
         if (!signedCookie || signedCookie.toLowerCase() !== captchaToken.toLowerCase()) {
             return next({ statusCode: 400, message: "Invalid captcha. Please try again." });
         }
-
-        // Clear captcha cookie after usage/attempt to prevent reuse (optional but good security)
-        res.clearCookie('captcha');
 
         const validUser = await User.findOne({
             $or: [{ email: identifier }, { username: identifier }]

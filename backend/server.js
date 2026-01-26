@@ -29,23 +29,6 @@ const limiter = rateLimit({
     max: 300, // limit each IP to 300 requests per windowMs (approx 1 req/3s)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    skip: (req, res) => {
-        // Exempt admin-heavy operations (Uploads, Edits)
-        // This assumes these routes are protected by Auth Middleware
-        if (req.method === 'OPTIONS') return true;
-        const adminMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
-        const adminPaths = [
-            '/api/products',
-            '/api/categories',
-            '/api/banners',
-            '/api/stats'
-        ];
-
-        if (adminMethods.includes(req.method) && adminPaths.some(p => req.originalUrl.startsWith(p))) {
-            return true;
-        }
-        return false;
-    }
 });
 app.use(limiter);
 

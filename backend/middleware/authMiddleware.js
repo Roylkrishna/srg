@@ -25,6 +25,18 @@ exports.verifyToken = (req, res, next) => {
     });
 };
 
+exports.verifyTokenOptional = (req, res, next) => {
+    const token = req.cookies.access_token;
+    if (!token) return next();
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (!err) {
+            req.user = user;
+        }
+        next();
+    });
+};
+
 exports.verifyAdmin = (req, res, next) => {
     const allowedRoles = ['owner', 'manager'];
     if (allowedRoles.includes(req.user.role)) {

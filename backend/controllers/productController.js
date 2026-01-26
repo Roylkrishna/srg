@@ -138,7 +138,16 @@ exports.deleteProduct = async (req, res, next) => {
 
 exports.getProduct = async (req, res, next) => {
     try {
-        const product = await Product.findById(req.params.id).populate('category');
+        let query = Product.findById(req.params.id).populate('category');
+
+        const allowedRoles = ['owner', 'manager', 'admin'];
+        const isAuthorized = req.user && allowedRoles.includes(req.user.role);
+
+        if (!isAuthorized) {
+            query = query.select('-purchasedPrice');
+        }
+
+        const product = await query;
         res.status(200).json(product);
     } catch (error) {
         next(error);
@@ -173,8 +182,38 @@ exports.getAllProducts = async (req, res, next) => {
 
         let query = Product.find(filter);
 
+        // handle select query
+        let fields = '';
         if (select) {
-            const fields = select.split(',').join(' ');
+            fields = select.split(',').join(' ');
+        }
+
+        const allowedRoles = ['owner', 'manager', 'admin'];
+        const isAuthorized = req.user && allowedRoles.includes(req.user.role);
+
+        if (!isAuthorized) {
+            // Explicitly exclude purchasedPrice for public users
+            if (!fields) {
+                // No select implies select * -> enforce exclusion
+                fields = '-purchasedPrice';
+            } else {
+                // If fields are provided, check projection type
+                const parts = fields.split(' ');
+                const isExclusion = parts.some(p => p.startsWith('-'));
+
+                if (isExclusion) {
+                    // If exclusion, ensure purchasedPrice is also excluded
+                    if (!parts.includes('-purchasedPrice')) {
+                        fields += ' -purchasedPrice';
+                    }
+                } else {
+                    // If inclusion, ensure purchasedPrice is NOT included
+                    fields = parts.filter(p => p !== 'purchasedPrice').join(' ');
+                }
+            }
+        }
+
+        if (fields) {
             query = query.select(fields);
         }
 
