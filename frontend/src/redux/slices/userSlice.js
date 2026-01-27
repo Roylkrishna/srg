@@ -116,6 +116,21 @@ export const adminResetPassword = createAsyncThunk('user/adminResetPassword', as
     }
 });
 
+export const fetchManagersStats = createAsyncThunk('user/fetchManagersStats', async ({ startDate, endDate }, thunkAPI) => {
+    try {
+        let url = '/users/managers-stats';
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (params.toString()) url += `?${params.toString()}`;
+
+        const response = await api.get(url, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 export const changePassword = createAsyncThunk('user/changePassword', async ({ oldPassword, newPassword }, thunkAPI) => {
     try {
         const response = await api.put('/users/change-password', { oldPassword, newPassword });
@@ -133,6 +148,8 @@ const userSlice = createSlice({
         users: [],
         currentUserDetails: null, // For single user details with orders (as per instruction's example)
         activities: [], // For manager work done (as per instruction)
+        managersStats: [], // New for manager activity overview
+        managersStatsLoading: false,
         loading: false,
         activityLoading: false, // Added as per instruction
         error: null,
@@ -250,6 +267,18 @@ const userSlice = createSlice({
             })
             .addCase(fetchManagerActivity.rejected, (state, action) => {
                 state.activityLoading = false;
+                state.error = action.payload;
+            })
+            // Managers Stats
+            .addCase(fetchManagersStats.pending, (state) => {
+                state.managersStatsLoading = true;
+            })
+            .addCase(fetchManagersStats.fulfilled, (state, action) => {
+                state.managersStatsLoading = false;
+                state.managersStats = action.payload;
+            })
+            .addCase(fetchManagersStats.rejected, (state, action) => {
+                state.managersStatsLoading = false;
                 state.error = action.payload;
             })
             // Toggle Wishlist

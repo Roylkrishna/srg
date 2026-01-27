@@ -15,4 +15,7 @@ router.get('/', verifyTokenOptional, getAllProducts);
 router.post('/record-sale', verifyToken, verifyAdmin, recordSale);
 router.get('/sales/history', verifyToken, verifyAdmin, getSalesHistory);
 
+// Reviews
+router.post('/:id/reviews', verifyToken, upload.single('image'), exports.addReview);
+
 module.exports = router;

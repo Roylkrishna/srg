@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Package, Settings, LogOut, Plus, Search, Filter, ChevronDown, Layout, LayoutDashboard, Bell, Menu, X as XIcon, Image as ImageIcon, Trash2, Edit, Save, ArrowLeft, Upload, Users, ShieldCheck, DollarSign, TrendingUp, Calendar, MapPin, Check, BarChart3, UserPlus, Info, ShieldAlert, UserX, History, ShoppingCart, IndianRupee, Printer, Key, Gift, ExternalLink, Tags, Clock, User as UserIcon } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, createProduct, deleteProduct, recordSale, fetchSalesHistory } from '../redux/slices/productSlice';
-import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus, adminResetPassword } from '../redux/slices/userSlice';
+import { fetchAllUsers, updateUserRole, createUser, deleteUser, toggleUserStatus, adminResetPassword, fetchManagersStats } from '../redux/slices/userSlice';
 import { fetchAllCategories, createCategory as addNewCategory, deleteCategory as removeCategory } from '../redux/slices/categorySlice';
 import { fetchBanners, addBanner as addNewBanner, deleteBanner as removeBanner } from '../redux/slices/bannerSlice';
 import { logoutUser } from '../redux/slices/authSlice';
@@ -17,7 +17,7 @@ const AdminDashboard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { items: products, salesHistory, loading } = useSelector((state) => state.products);
-    const { users, loading: userLoading } = useSelector((state) => state.user);
+    const { users, managersStats, managersStatsLoading, loading: userLoading } = useSelector((state) => state.user);
     const { categories, loading: categoryLoading } = useSelector((state) => state.categories);
     const { banners, loading: bannerLoading } = useSelector((state) => state.banners);
     const { dashboardData: analyticsData, loading: analyticsLoading } = useSelector((state) => state.analytics);
@@ -30,8 +30,14 @@ const AdminDashboard = () => {
     const [isAddBannerMode, setIsAddBannerMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Manager Activity Stats State
+    const [statsDateRange, setStatsDateRange] = useState({
+        startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0]
+    });
+
     const [newProduct, setNewProduct] = useState({
-        name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: []
+        name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: [], tags: ''
     });
     const [imageFiles, setImageFiles] = useState([]); // Store files for upload
 
@@ -89,6 +95,9 @@ const AdminDashboard = () => {
             dispatch(fetchAllCategories());
         } else if (activeTab === 'users' || activeTab === 'managers') {
             dispatch(fetchAllUsers());
+            if (activeTab === 'managers' && user?.role === 'owner') {
+                dispatch(fetchManagersStats(statsDateRange));
+            }
         } else if (activeTab === 'banners') {
             dispatch(fetchBanners());
         } else if (activeTab === 'contact') {
@@ -116,13 +125,13 @@ const AdminDashboard = () => {
         formData.append('description', newProduct.description);
         formData.append('quantityAvailable', newProduct.quantityAvailable);
 
-        imageFiles.forEach(file => {
-            formData.append('images', file);
-        });
+        if (newProduct.tags) {
+            formData.append('tags', newProduct.tags);
+        }
 
         dispatch(createProduct(formData)).then(() => {
             setIsAddMode(false);
-            setNewProduct({ name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: [] });
+            setNewProduct({ name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: [], tags: '' });
             setImageFiles([]);
         }).catch(err => {
             alert("Failed to add product: " + err);
@@ -398,6 +407,7 @@ const AdminDashboard = () => {
                                             ))}
                                         </select>
                                         <input placeholder="Quantity" type="number" value={newProduct.quantityAvailable} onChange={e => setNewProduct({ ...newProduct, quantityAvailable: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" required />
+                                        <input placeholder="Tags (comma separated e.g. handmade, gift, new)" value={newProduct.tags} onChange={e => setNewProduct({ ...newProduct, tags: e.target.value })} className="border p-2 rounded-lg outline-none focus:ring-1 focus:ring-red-500" />
                                     </div>
                                     <textarea placeholder="Description" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} className="border p-2 rounded-lg w-full outline-none focus:ring-1 focus:ring-red-500" required />
                                     <div className="md:col-span-2 space-y-2">
@@ -443,7 +453,14 @@ const AdminDashboard = () => {
                                                             </div>
                                                             <div className="flex flex-col">
                                                                 <span className="font-medium text-gray-900">{p.name}</span>
-                                                                <span className="text-xs text-gray-500">{p.category?.name || 'Uncategorized'}</span>
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    <span className="text-xs text-gray-500">{p.category?.name || 'Uncategorized'}</span>
+                                                                    {p.tags && p.tags.map(tag => (
+                                                                        <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded border border-gray-200 uppercase font-black tracking-tighter">
+                                                                            #{tag}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -703,6 +720,76 @@ const AdminDashboard = () => {
                                     <button onClick={() => setIsAddUserMode(true)} className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors shadow-sm">
                                         <UserPlus size={20} /> Add Manager
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* Manager Stats Section */}
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 space-y-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                                            <BarChart3 size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-gray-900">Product Update/Add Stats</h3>
+                                            <p className="text-xs text-gray-500">Overview of manager productivity</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
+                                        <div className="flex flex-col gap-0.5">
+                                            <label className="text-[10px] font-black uppercase text-gray-400 px-2">From</label>
+                                            <input
+                                                type="date"
+                                                value={statsDateRange.startDate}
+                                                onChange={(e) => setStatsDateRange({ ...statsDateRange, startDate: e.target.value })}
+                                                className="bg-transparent text-sm font-bold px-2 outline-none cursor-pointer"
+                                            />
+                                        </div>
+                                        <div className="h-8 w-px bg-gray-200 mx-1"></div>
+                                        <div className="flex flex-col gap-0.5">
+                                            <label className="text-[10px] font-black uppercase text-gray-400 px-2">To</label>
+                                            <input
+                                                type="date"
+                                                value={statsDateRange.endDate}
+                                                onChange={(e) => setStatsDateRange({ ...statsDateRange, endDate: e.target.value })}
+                                                className="bg-transparent text-sm font-bold px-2 outline-none cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {managersStatsLoading ? (
+                                        <div className="col-span-full py-8 text-center text-gray-400">Loading statistics...</div>
+                                    ) : managersStats.length === 0 ? (
+                                        <div className="col-span-full py-8 text-center text-gray-400 italic bg-gray-50 rounded-xl border-2 border-dashed border-gray-100">
+                                            No activity recorded for this period.
+                                        </div>
+                                    ) : (
+                                        managersStats.map(stat => (
+                                            <div key={stat.managerId} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 hover:border-red-100 transition-all group">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-8 w-8 rounded-full bg-white text-red-600 flex items-center justify-center font-black text-xs border border-gray-100 uppercase">
+                                                            {stat.username?.[0] || 'M'}
+                                                        </div>
+                                                        <span className="font-bold text-gray-900 text-sm">{stat.name}</span>
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase">@{stat.username}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="bg-white p-3 rounded-xl border border-gray-100 flex flex-col items-center">
+                                                        <span className="text-2xl font-black text-green-600">{stat.added}</span>
+                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Added</span>
+                                                    </div>
+                                                    <div className="bg-white p-3 rounded-xl border border-gray-100 flex flex-col items-center">
+                                                        <span className="text-2xl font-black text-blue-600">{stat.updated}</span>
+                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Updated</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 

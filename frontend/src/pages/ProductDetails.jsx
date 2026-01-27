@@ -1,18 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Heart, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { Link, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProductDetails } from '../redux/slices/productSlice';
-import { toggleWishlistProduct } from '../redux/slices/userSlice';
-import { logAnalyticsEvent } from '../redux/slices/analyticsSlice';
-import Navbar from '../components/Navbar';
-import confetti from 'canvas-confetti';
+import ReviewForm from '../components/reviews/ReviewForm';
+import { addReview } from '../redux/slices/productSlice';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
-    const { productDetails: product, loading, error } = useSelector((state) => state.products);
+    const { productDetails: product, loading, error, reviewLoading } = useSelector((state) => state.products);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
@@ -97,6 +89,22 @@ const ProductDetails = () => {
         dispatch(toggleWishlistProduct(product._id));
     };
 
+    const handleReviewSubmit = async (reviewData) => {
+        const formData = new FormData();
+        formData.append('rating', reviewData.rating);
+        formData.append('comment', reviewData.comment);
+        if (reviewData.image) {
+            formData.append('image', reviewData.image);
+        }
+
+        try {
+            await dispatch(addReview({ productId: product._id, reviewData: formData })).unwrap();
+            alert("Review submitted successfully!");
+        } catch (err) {
+            alert(err);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gift-cream selection:bg-royal-red/30">
             <Navbar />
@@ -112,7 +120,7 @@ const ProductDetails = () => {
                     </Link>
                 </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
                     {/* Image Gallery */}
                     <div className="lg:col-span-7 space-y-6">
                         <motion.div
@@ -144,6 +152,11 @@ const ProductDetails = () => {
                                 <span className="px-3 py-1.5 md:px-5 md:py-2 glass-card text-royal-gold text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full">
                                     Handcrafted
                                 </span>
+                                {product.tags && product.tags.map(tag => (
+                                    <span key={tag} className="px-3 py-1.5 md:px-5 md:py-2 bg-royal-black text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full shadow-2xl opacity-90">
+                                        {tag}
+                                    </span>
+                                ))}
                             </div>
                         </motion.div>
 
@@ -178,7 +191,7 @@ const ProductDetails = () => {
                                             <Star key={i} size={14} className={i < (product.rating || 0) ? "fill-royal-gold" : "text-gray-200"} />
                                         ))}
                                     </div>
-                                    <span>{product.reviews || 0} Royal Reviews</span>
+                                    <span>{product.reviews?.length || 0} Royal Reviews</span>
                                 </div>
                                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">
                                     {product.name}
@@ -197,7 +210,7 @@ const ProductDetails = () => {
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-black uppercase tracking-widest text-gray-400">Stock Availability</span>
                                     <span className="text-xs font-bold text-green-600 bg-green-50 px-4 py-1 rounded-full uppercase tracking-tighter">
-                                        {product.countInStock > 0 ? `${product.countInStock} Pieces Available` : 'Limited Reservation Only'}
+                                        {product.quantityAvailable > 0 ? `${product.quantityAvailable} Pieces Available` : 'Limited Reservation Only'}
                                     </span>
                                 </div>
 
@@ -220,6 +233,81 @@ const ProductDetails = () => {
                                 </div>
                             </div>
                         </motion.div>
+                    </div>
+                </div>
+
+                {/* Reviews Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 pt-16 border-t border-gray-100/50">
+                    <div className="space-y-12">
+                        <div className="space-y-4">
+                            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900">Divine Reviews</h2>
+                            <p className="text-gray-500 text-sm font-medium">Voices from our spiritual community.</p>
+                        </div>
+
+                        {product.reviews && product.reviews.length > 0 ? (
+                            <div className="space-y-8">
+                                {product.reviews.map((rev, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        className="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm space-y-4"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center font-bold text-red-600 uppercase text-xs">
+                                                    {rev.userId?.firstName?.[0] || 'A'}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 text-sm">{rev.userId?.firstName} {rev.userId?.lastName}</h4>
+                                                    <div className="flex gap-1">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} size={12} className={i < rev.rating ? "fill-royal-gold text-royal-gold" : "text-gray-200"} />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                {new Date(rev.date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-600 text-sm leading-relaxed italic font-medium">
+                                            "{rev.comment}"
+                                        </p>
+                                        {rev.image && (
+                                            <div className="pt-2">
+                                                <img src={rev.image} alt="User Review" className="h-40 w-40 object-cover rounded-2xl shadow-lg border-4 border-white" />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-12 px-8 bg-white rounded-[2rem] border border-dashed border-gray-200 text-center space-y-4">
+                                <Star size={40} className="mx-auto text-gray-100" />
+                                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Be the first to leave a royal review</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="lg:sticky lg:top-32 h-fit">
+                        {user ? (
+                            <ReviewForm onSubmit={handleReviewSubmit} loading={reviewLoading} />
+                        ) : (
+                            <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-premium space-y-6">
+                                <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center text-red-600 mx-auto">
+                                    <Sparkles size={32} />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-serif font-bold text-gray-900">Join the Circle</h3>
+                                    <p className="text-gray-500 text-sm font-medium">Please login to share your divine experience with this piece.</p>
+                                </div>
+                                <Link to="/login" className="block w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-100">
+                                    Login to Review
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

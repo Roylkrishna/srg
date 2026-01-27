@@ -172,6 +172,71 @@ exports.getManagerActivity = async (req, res, next) => {
     }
 };
 
+exports.getManagersStats = async (req, res, next) => {
+    try {
+        const { startDate, endDate } = req.query;
+        let dateFilter = {};
+        if (startDate || endDate) {
+            dateFilter = { timestamp: {} };
+            if (startDate) dateFilter.timestamp.$gte = new Date(startDate);
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                dateFilter.timestamp.$lte = end;
+            }
+        }
+
+        const stats = await Activity.aggregate([
+            { $match: dateFilter },
+            {
+                $group: {
+                    _id: { userId: '$userId', action: '$action' },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id.userId',
+                    foreignField: '_id',
+                    as: 'manager'
+                }
+            },
+            { $unwind: '$manager' },
+            {
+                $project: {
+                    userId: '$_id.userId',
+                    action: '$_id.action',
+                    count: 1,
+                    managerName: { $concat: ['$manager.firstName', ' ', '$manager.lastName'] },
+                    managerUsername: '$manager.username'
+                }
+            }
+        ]);
+
+        // Reformat data for frontend consumption (group by manager)
+        const formattedStats = stats.reduce((acc, curr) => {
+            const userId = curr.userId.toString();
+            if (!acc[userId]) {
+                acc[userId] = {
+                    managerId: userId,
+                    name: curr.managerName,
+                    username: curr.managerUsername,
+                    added: 0,
+                    updated: 0
+                };
+            }
+            if (curr.action === 'CREATE') acc[userId].added = curr.count;
+            if (curr.action === 'UPDATE') acc[userId].updated = curr.count;
+            return acc;
+        }, {});
+
+        res.status(200).json(Object.values(formattedStats));
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.toggleWishlist = async (req, res, next) => {
     try {
         const { productId } = req.body;

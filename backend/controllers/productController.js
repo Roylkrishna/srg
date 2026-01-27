@@ -10,6 +10,13 @@ exports.createProduct = async (req, res, next) => {
             lastEditedAt: new Date()
         };
 
+        // Handle tags: convert comma-separated string to array
+        if (req.body.tags) {
+            productData.tags = req.body.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag !== '');
+        } else {
+            productData.tags = [];
+        }
+
         if (req.files && req.files.length > 0) {
             const imagePaths = req.files.map(file => {
                 return file.path; // Cloudinary returns the full URL in 'path'
@@ -44,6 +51,11 @@ exports.updateProduct = async (req, res, next) => {
             lastEditedBy: req.user.id,
             lastEditedAt: new Date()
         };
+
+        // Handle tags: convert comma-separated string to array
+        if (req.body.tags) {
+            updateData.tags = req.body.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag !== '');
+        }
 
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => {
@@ -286,6 +298,45 @@ exports.getSalesHistory = async (req, res, next) => {
             .sort({ createdAt: -1 })
             .limit(50);
         res.status(200).json(sales);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.addReview = async (req, res, next) => {
+    try {
+        const { rating, comment } = req.body;
+        const productId = req.params.id;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found." });
+        }
+
+        const review = {
+            userId: req.user.id,
+            rating: Number(rating),
+            comment,
+            date: new Date()
+        };
+
+        if (req.file) {
+            review.image = req.file.path; // Cloudinary URL
+        }
+
+        product.reviews.push(review);
+
+        // Industry Standard: Recalculate Aggregates
+        product.numReviews = product.reviews.length;
+        product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+        await product.save();
+
+        const updatedProduct = await Product.findById(productId)
+            .populate('category')
+            .populate('reviews.userId', 'firstName lastName profilePicture');
+
+        res.status(201).json(updatedProduct);
     } catch (error) {
         next(error);
     }

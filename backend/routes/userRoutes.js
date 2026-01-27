@@ -1,5 +1,5 @@
 const express = require('express');
-const { updateProfile, getUser, getAllUsers, getUserWithOrders, updateUserRole, createUser, deleteUser, toggleUserStatus, getManagerActivity, toggleWishlist, getWishlist, adminResetPassword, changePassword } = require('../controllers/userController');
+const { updateProfile, getUser, getAllUsers, getUserWithOrders, updateUserRole, createUser, deleteUser, toggleUserStatus, getManagerActivity, getManagersStats, toggleWishlist, getWishlist, adminResetPassword, changePassword } = require('../controllers/userController');
 const { verifyToken, verifyAdmin, verifyOwner } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -14,6 +14,7 @@ router.get('/:id', verifyToken, getUser);
 router.get('/', verifyToken, verifyAdmin, getAllUsers);
 router.get('/details/:id', verifyToken, verifyOwner, getUserWithOrders);
 router.get('/activity/:id', verifyToken, verifyOwner, getManagerActivity);
+router.get('/managers-stats', verifyToken, verifyOwner, getManagersStats);
 router.post('/', verifyToken, verifyOwner, createUser);
 router.put('/:id/role', verifyToken, verifyOwner, updateUserRole);
 router.delete('/:id', verifyToken, verifyOwner, deleteUser);

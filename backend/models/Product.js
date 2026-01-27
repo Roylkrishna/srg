@@ -13,8 +13,12 @@ const productSchema = new mongoose.Schema({
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         rating: Number,
         comment: String,
+        image: String,
         date: { type: Date, default: Date.now }
     }],
+    rating: { type: Number, default: 0 },
+    numReviews: { type: Number, default: 0 },
+    tags: [{ type: String, trim: true }],
     lastEditedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     lastEditedAt: { type: Date }
 }, { timestamps: true });

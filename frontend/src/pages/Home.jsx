@@ -9,6 +9,7 @@ import { fetchAllCategories } from '../redux/slices/categorySlice';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
+import ProductSection from '../components/home/ProductSection';
 import SkeletonProduct from '../components/skeletons/SkeletonProduct';
 
 const Home = () => {
@@ -18,50 +19,76 @@ const Home = () => {
     const { categories } = useSelector((state) => state.categories);
 
     useEffect(() => {
-        dispatch(fetchProducts({ select: '_id,name,price,description,image,images,rating,reviews,isNew,category' }));
+        dispatch(fetchProducts({ select: '_id,name,price,description,image,images,rating,reviews,isNew,category,tags' }));
         dispatch(fetchBanners());
         dispatch(fetchAllCategories());
-        dispatch(fetchAllCategories());
-        // dispatch(fetchStats()); // Removed as it likely requires auth and isn't used on Home
     }, [dispatch]);
+
+    // Grouping Logic
+    const groupedProducts = products.reduce((acc, product) => {
+        if (product.tags && Array.isArray(product.tags)) {
+            product.tags.forEach(tag => {
+                const normalizedTag = tag.toLowerCase().trim();
+                if (!acc[normalizedTag]) {
+                    acc[normalizedTag] = [];
+                }
+                acc[normalizedTag].push(product);
+            });
+        }
+        return acc;
+    }, {});
+
+    const hasTags = Object.keys(groupedProducts).length > 0;
 
     return (
         <div className="min-h-screen bg-gift-cream selection:bg-royal-red/30">
             <Navbar />
             <Hero banners={banners} />
-            {/* Product Collection Section */}
-            <section id="product-collection" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24 lg:py-32">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-12 sm:mb-20"
-                >
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900">Our Collection</h2>
-                </motion.div>
 
-                {loading ? (
+            {loading ? (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 lg:gap-12">
                         {[...Array(4)].map((_, i) => (
                             <SkeletonProduct key={i} />
                         ))}
                     </div>
-                ) : (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 lg:gap-12">
-                        {products.map((product, index) => (
-                            <motion.div
-                                key={product._id || product.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <ProductCard product={product} />
-                            </motion.div>
+                </div>
+            ) : (
+                <>
+                    {/* Dynamic Tag Sections */}
+                    {Object.entries(groupedProducts)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([tag, tagProducts]) => (
+                            <ProductSection key={tag} title={tag} products={tagProducts} />
                         ))}
-                    </div>
-                )}
-            </section>
+
+                    {/* All Products Section */}
+                    <section id="product-collection" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-24">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-center mb-12 sm:mb-20"
+                        >
+                            <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900 border-b-2 border-red-600/10 inline-block pb-4">Our Full Collection</h2>
+                        </motion.div>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 lg:gap-12">
+                            {products.map((product, index) => (
+                                <motion.div
+                                    key={product._id || product.id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
+                </>
+            )}
 
 
 

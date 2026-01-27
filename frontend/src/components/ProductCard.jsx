@@ -91,6 +91,11 @@ const ProductCard = ({ product }) => {
                             {typeof product.category === 'object' ? product.category.name : product.category}
                         </span>
                     )}
+                    {product.tags && product.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-royal-black text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg opacity-90">
+                            {tag}
+                        </span>
+                    ))}
                 </div>
 
                 {/* Favorite Button */}
@@ -138,9 +143,9 @@ const ProductCard = ({ product }) => {
                         ))}
                     </div>
                     <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest hidden sm:inline">
-                        {product.reviews} Reviews
+                        {product.numReviews || 0} Reviews
                     </span>
-                    <span className="text-[9px] text-gray-400 font-bold sm:hidden">({product.reviews})</span>
+                    <span className="text-[9px] text-gray-400 font-bold sm:hidden">({product.numReviews || 0})</span>
                 </div>
 
                 <Link to={`/product/${product._id}`}>

@@ -51,7 +51,7 @@ export const updateProduct = createAsyncThunk('products/update', async ({ id, da
 
 export const searchProducts = createAsyncThunk('products/search', async (query, thunkAPI) => {
     try {
-        const response = await api.get('/products', { params: { search: query, select: 'name,price,image,images,category' } });
+        const response = await api.get('/products', { params: { search: query, select: 'name,price,image,images,category,tags,rating,numReviews' } });
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
@@ -70,6 +70,17 @@ export const recordSale = createAsyncThunk('products/recordSale', async (saleDat
 export const fetchSalesHistory = createAsyncThunk('products/fetchSalesHistory', async (_, thunkAPI) => {
     try {
         const response = await api.get('/products/sales/history');
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const addReview = createAsyncThunk('products/addReview', async ({ productId, reviewData }, thunkAPI) => {
+    try {
+        const response = await api.post(`/products/${productId}/reviews`, reviewData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
@@ -163,6 +174,15 @@ const productSlice = createSlice({
             // Fetch Sales History
             .addCase(fetchSalesHistory.fulfilled, (state, action) => {
                 state.salesHistory = action.payload;
+            })
+            // Add Review
+            .addCase(addReview.fulfilled, (state, action) => {
+                state.productDetails = action.payload;
+                // Also update in list if present
+                const index = state.items.findIndex(p => p._id === action.payload._id);
+                if (index !== -1) {
+                    state.items[index] = action.payload;
+                }
             });
     }
 });

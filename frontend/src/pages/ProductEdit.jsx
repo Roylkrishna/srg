@@ -21,6 +21,7 @@ const ProductEdit = () => {
         category: '',
         description: '',
         quantityAvailable: '',
+        tags: '',
         existingImages: [], // URLs from backend
         newImages: [] // File objects
     });
@@ -40,6 +41,7 @@ const ProductEdit = () => {
                 category: product.category?._id || product.category, // Handle populated category
                 description: product.description,
                 quantityAvailable: product.quantityAvailable,
+                tags: product.tags ? product.tags.join(', ') : '',
                 existingImages: product.images || [],
                 newImages: []
             });
@@ -52,6 +54,7 @@ const ProductEdit = () => {
                     category: data.category?._id || data.category,
                     description: data.description,
                     quantityAvailable: data.quantityAvailable,
+                    tags: data.tags ? data.tags.join(', ') : '',
                     existingImages: data.images || [],
                     newImages: []
                 });
@@ -77,6 +80,7 @@ const ProductEdit = () => {
         data.append('category', formData.category);
         data.append('description', formData.description);
         data.append('quantityAvailable', formData.quantityAvailable);
+        data.append('tags', formData.tags);
 
         // Append existing images as text fields (backend will parse them)
         formData.existingImages.forEach(img => {
@@ -219,14 +223,13 @@ const ProductEdit = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-gray-700 ml-1">Stock Quantity</label>
+                                <label className="text-sm font-semibold text-gray-700 ml-1">Tags (comma separated)</label>
                                 <input
-                                    name="quantityAvailable"
-                                    type="number"
-                                    value={formData.quantityAvailable}
+                                    name="tags"
+                                    value={formData.tags}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all outline-none"
-                                    placeholder="0"
+                                    placeholder="e.g. handmade, gift, festive"
                                 />
                             </div>
                         </div>
