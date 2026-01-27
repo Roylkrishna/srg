@@ -3,7 +3,8 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area
 } from 'recharts';
-import { Package, Search, TrendingUp, AlertCircle, Activity, Users } from 'lucide-react';
+import { Package, Search, TrendingUp, AlertCircle, Activity, Users, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ActivityMap from './ActivityMap';
 
 const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => {
@@ -241,11 +242,16 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
 
                 {/* User Activity Log (New) */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2">
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
-                            <Activity size={20} />
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                                <Activity size={20} />
+                            </div>
+                            <h3 className="font-bold text-gray-900">Recent User Activity (Log)</h3>
                         </div>
-                        <h3 className="font-bold text-gray-900">Recent User Activity (Log)</h3>
+                        <Link to="/admin-secure-access-7x24/activity-log" className="flex items-center gap-1 text-sm font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                            View Full Logs <ArrowRight size={16} />
+                        </Link>
                     </div>
 
 
@@ -324,7 +330,7 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 };
 

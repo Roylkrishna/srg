@@ -13,6 +13,7 @@ import Wishlist from './pages/Wishlist';
 import AboutUs from './pages/AboutUs';
 import Contact from './pages/Contact';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ActivityLog from './pages/ActivityLog';
 
 import Footer from './components/Footer';
 
@@ -117,6 +118,14 @@ function App() {
               element={
                 <AdminRoute>
                   <UserDetail />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin-secure-access-7x24/activity-log"
+              element={
+                <AdminRoute>
+                  <ActivityLog />
                 </AdminRoute>
               }
             />

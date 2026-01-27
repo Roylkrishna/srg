@@ -20,4 +20,7 @@ router.post('/log', analyticsController.logEvent);
 // Admin only dashboard stats
 router.get('/dashboard', verifyToken, verifyOwner, analyticsController.getDashboardStats);
 
+// Get paginated activity logs
+router.get('/logs', verifyToken, verifyOwner, analyticsController.getActivityLogs);
+
 module.exports = router;
