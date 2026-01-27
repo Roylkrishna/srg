@@ -1,5 +1,6 @@
 const Analytics = require('../models/Analytics');
 const Product = require('../models/Product');
+const Activity = require('../models/Activity');
 
 const geoip = require('geoip-lite');
 
@@ -145,5 +146,41 @@ exports.getDashboardStats = async (req, res) => {
     } catch (error) {
         console.error('Analytics Dashboard Error:', error);
         res.status(500).json({ message: 'Error fetching analytics' });
+    }
+};
+// @desc    Get paginated activity logs
+// @route   GET /api/analytics/logs
+// @access  Private (Owner)
+exports.getActivityLogs = async (req, res) => {
+    try {
+        const { page = 1, limit = 20, userId, action, startDate, endDate } = req.query;
+        const query = {};
+
+        if (userId) query.userId = userId;
+        if (action) query.action = action;
+
+        if (startDate || endDate) {
+            query.timestamp = {};
+            if (startDate) query.timestamp.$gte = new Date(startDate);
+            if (endDate) query.timestamp.$lte = new Date(endDate);
+        }
+
+        const logs = await Activity.find(query)
+            .populate('userId', 'firstName lastName email profilePicture')
+            .sort({ timestamp: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        const count = await Activity.countDocuments(query);
+
+        res.status(200).json({
+            logs,
+            totalPages: Math.ceil(count / limit),
+            currentPage: Number(page),
+            totalLogs: count
+        });
+    } catch (error) {
+        console.error('Error fetching activity logs:', error);
+        res.status(500).json({ message: 'Error fetching activity logs' });
     }
 };
