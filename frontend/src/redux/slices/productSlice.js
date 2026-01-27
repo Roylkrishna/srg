@@ -81,7 +81,27 @@ export const addReview = createAsyncThunk('products/addReview', async ({ product
         const response = await api.post(`/products/${productId}/reviews`, reviewData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-        return response.data;
+        return response.data; // Returns updated product
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const deleteReview = createAsyncThunk('products/deleteReview', async ({ productId, reviewId }, thunkAPI) => {
+    try {
+        const response = await api.delete(`/products/${productId}/reviews/${reviewId}`);
+        return response.data; // Returns updated product
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
+export const updateReview = createAsyncThunk('products/updateReview', async ({ productId, reviewId, reviewData }, thunkAPI) => {
+    try {
+        const response = await api.put(`/products/${productId}/reviews/${reviewId}`, reviewData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data; // Returns updated product
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -183,6 +203,16 @@ const productSlice = createSlice({
                 if (index !== -1) {
                     state.items[index] = action.payload;
                 }
+            })
+            // Delete Review
+            .addCase(deleteReview.fulfilled, (state, action) => {
+                state.productDetails = action.payload;
+                state.loading = false;
+            })
+            // Update Review
+            .addCase(updateReview.fulfilled, (state, action) => {
+                state.productDetails = action.payload;
+                state.loading = false;
             });
     }
 });

@@ -341,3 +341,79 @@ exports.addReview = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.deleteReview = async (req, res, next) => {
+    try {
+        const { id, reviewId } = req.params;
+        const product = await Product.findById(id);
+
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
+        const review = product.reviews.id(reviewId);
+        if (!review) return res.status(404).json({ message: "Review not found" });
+
+        // Authorization: Admin/Manager OR Review Author
+        const isAuthor = review.userId.toString() === req.user.id;
+        const isAdmin = ['owner', 'manager', 'admin'].includes(req.user.role);
+
+        if (!isAuthor && !isAdmin) {
+            return res.status(403).json({ message: "Not authorized to delete this review" });
+        }
+
+        // Remove the review
+        product.reviews.pull(reviewId);
+
+        // Standard: Recalculate Aggregates
+        product.numReviews = product.reviews.length;
+        product.rating = product.reviews.length > 0
+            ? product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length
+            : 0;
+
+        await product.save();
+
+        // Return fully populated product for UI update
+        const updatedProduct = await Product.findById(id)
+            .populate('category')
+            .populate('reviews.userId', 'firstName lastName profilePicture');
+
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.updateReview = async (req, res, next) => {
+    try {
+        const { id, reviewId } = req.params;
+        const { rating, comment } = req.body;
+
+        const product = await Product.findById(id);
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
+        const review = product.reviews.id(reviewId);
+        if (!review) return res.status(404).json({ message: "Review not found" });
+
+        // Authorization: ONLY Author can edit text/rating
+        if (review.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: "You can only edit your own reviews" });
+        }
+
+        // Update fields
+        if (rating) review.rating = Number(rating);
+        if (comment) review.comment = comment;
+        if (req.file) review.image = req.file.path; // Update image if provided
+
+        // Recalculate Aggregates (Rating might change)
+        product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+        await product.save();
+
+        const updatedProduct = await Product.findById(id)
+            .populate('category')
+            .populate('reviews.userId', 'firstName lastName profilePicture');
+
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        next(error);
+    }
+};

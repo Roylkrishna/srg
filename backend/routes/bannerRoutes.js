@@ -1,7 +1,7 @@
 const express = require('express');
 const { getBanners, addBanner, updateBanner, deleteBanner } = require('../controllers/bannerController');
 const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { upload } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 

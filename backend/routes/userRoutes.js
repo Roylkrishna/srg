@@ -1,7 +1,7 @@
 const express = require('express');
 const { updateProfile, getUser, getAllUsers, getUserWithOrders, updateUserRole, createUser, deleteUser, toggleUserStatus, getManagerActivity, getManagersStats, toggleWishlist, getWishlist, adminResetPassword, changePassword } = require('../controllers/userController');
 const { verifyToken, verifyAdmin, verifyOwner } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { upload } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 

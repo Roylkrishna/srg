@@ -1,47 +1,64 @@
-import React, { useState } from 'react';
-import { Star, Camera, X, Loader2, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Star, Camera, X, Loader2, Sparkles, Send } from 'lucide-react';
 import { compressImage } from '../../lib/imageCompression';
 
-const ReviewForm = ({ onSubmit, loading }) => {
-    const [rating, setRating] = useState(5);
+const ReviewForm = ({ onSubmit, loading, initialData, submitLabel = "Submit Review" }) => {
+    const [rating, setRating] = useState(0);
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState('');
     const [image, setImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [isCompressing, setIsCompressing] = useState(false);
+    const [preview, setPreview] = useState(null);
+    const [compressionLoading, setCompressionLoading] = useState(false);
+
+    // Pre-fill form if editing
+    useEffect(() => {
+        if (initialData) {
+            setRating(initialData.rating || 0);
+            setComment(initialData.comment || '');
+            if (initialData.image) {
+                setPreview(initialData.image);
+                // Don't set 'image' state unless file changes, to avoid re-uploading URL
+            }
+        }
+    }, [initialData]);
 
     const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-            setIsCompressing(true);
+            setCompressionLoading(true);
             try {
                 // Compress to 150KB as requested
                 const compressed = await compressImage(file, 150);
                 setImage(compressed);
-                setImagePreview(URL.createObjectURL(compressed));
+                setPreview(URL.createObjectURL(compressed));
             } catch (err) {
                 console.error("Compression failed:", err);
                 alert("Failed to process image. Please try another.");
             } finally {
-                setIsCompressing(false);
+                setCompressionLoading(false);
             }
         }
     };
 
     const clearImage = () => {
         setImage(null);
-        setImagePreview(null);
+        setPreview(null);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!comment.trim()) return alert("Please leave a comment.");
+
+        // Pass 'image' (file) if changed, otherwise valid only if not editing or if we want to update text only
         onSubmit({ rating, comment, image });
-        // Reset after submit
-        setComment('');
-        setImage(null);
-        setImagePreview(null);
-        setRating(5);
+
+        // Only clear if NOT editing
+        if (!initialData) {
+            setComment('');
+            setImage(null);
+            setPreview(null);
+            setRating(0);
+        }
     };
 
     return (
@@ -92,15 +109,15 @@ const ReviewForm = ({ onSubmit, loading }) => {
                 <div className="flex items-center gap-4">
                     <label className="cursor-pointer group flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-lg active:scale-95">
                         <Camera size={18} />
-                        {isCompressing ? 'Processing...' : 'Add Photo'}
-                        <input type="file" onChange={handleImageChange} className="hidden" accept="image/*" disabled={isCompressing || loading} />
+                        {compressionLoading ? 'Processing...' : 'Add Photo'}
+                        <input type="file" onChange={handleImageChange} className="hidden" accept="image/*" disabled={compressionLoading || loading} />
                     </label>
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Max 150KB (Auto-compressed)</span>
                 </div>
 
-                {imagePreview && (
+                {preview && (
                     <div className="relative inline-block group">
-                        <img src={imagePreview} alt="Preview" className="h-32 w-32 object-cover rounded-2xl border-4 border-white shadow-xl" />
+                        <img src={preview} alt="Preview" className="h-32 w-32 object-cover rounded-2xl border-4 border-white shadow-xl" />
                         <button
                             type="button"
                             onClick={clearImage}
@@ -114,15 +131,18 @@ const ReviewForm = ({ onSubmit, loading }) => {
 
             <button
                 type="submit"
-                disabled={loading || isCompressing}
-                className="w-full py-5 bg-royal-black text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-black transition-all shadow-premium active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                disabled={loading || compressionLoading || rating === 0}
+                className="w-full bg-royal-black text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-royal-red transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-                {loading ? (
-                    <Loader2 className="animate-spin" size={18} />
+                {loading || compressionLoading ? (
+                    <>
+                        <Loader2 className="animate-spin" size={16} />
+                        {compressionLoading ? 'Compressing...' : 'Submitting...'}
+                    </>
                 ) : (
                     <>
-                        Submit Divine Review
-                        <Sparkles size={16} className="group-hover:translate-x-1 transition-transform" />
+                        <Send size={16} />
+                        {submitLabel}
                     </>
                 )}
             </button>

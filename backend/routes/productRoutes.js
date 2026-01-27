@@ -1,7 +1,7 @@
 const express = require('express');
-const { createProduct, updateProduct, deleteProduct, getProduct, getAllProducts, recordSale, getSalesHistory, addReview } = require('../controllers/productController');
+const { createProduct, updateProduct, deleteProduct, getProduct, getAllProducts, recordSale, getSalesHistory, addReview, deleteReview, updateReview } = require('../controllers/productController');
 const { verifyToken, verifyAdmin, verifyTokenOptional } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { upload } = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
@@ -16,6 +16,10 @@ router.post('/record-sale', verifyToken, verifyAdmin, recordSale);
 router.get('/sales/history', verifyToken, verifyAdmin, getSalesHistory);
 
 // Reviews
-router.post('/:id/reviews', verifyToken, upload.single('image'), addReview);
+const { uploadReview } = require('../middleware/uploadMiddleware');
+router.post('/:id/reviews', verifyToken, uploadReview.single('image'), addReview);
+// Update & Delete Review
+router.delete('/:id/reviews/:reviewId', verifyToken, deleteReview);
+router.put('/:id/reviews/:reviewId', verifyToken, uploadReview.single('image'), updateReview);
 
 module.exports = router;

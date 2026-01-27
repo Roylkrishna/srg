@@ -183,7 +183,15 @@ const UserDetail = () => {
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div>
                                             <h3 className="text-2xl font-serif font-bold text-gray-900 mb-1">Work Done</h3>
-                                            <p className="text-sm text-gray-500 font-medium">Tracking manager productivity and updates</p>
+                                            <p className="text-sm text-gray-500 font-medium mb-2">Tracking manager productivity and updates</p>
+                                            <div className="flex gap-4">
+                                                <div className="px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                                    Added: {activities?.filter(a => a.action === 'CREATE').length || 0}
+                                                </div>
+                                                <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                                    Updated: {activities?.filter(a => a.action === 'UPDATE').length || 0}
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="flex flex-col gap-1">

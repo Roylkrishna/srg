@@ -1,5 +1,14 @@
+﻿import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductDetails, addReview, deleteReview, updateReview } from '../redux/slices/productSlice';
+import { toggleWishlistProduct } from '../redux/slices/userSlice';
+import { logAnalyticsEvent } from '../redux/slices/analyticsSlice';
+import Navbar from '../components/Navbar';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Star, ShoppingBag, ArrowLeft, ShieldCheck, Sparkles, Trash2, Edit2, X } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import ReviewForm from '../components/reviews/ReviewForm';
-import { addReview } from '../redux/slices/productSlice';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -8,6 +17,7 @@ const ProductDetails = () => {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [editingReview, setEditingReview] = useState(null); // Track which review is being edited
 
     const images = product?.images && product.images.length > 0 ? product.images : (product?.image ? [product.image] : []);
 
@@ -71,7 +81,6 @@ const ProductDetails = () => {
     }
 
     const isLiked = currentUser?.likedProducts?.includes(product._id);
-    // Images declaration moved up for auto-scroll logic
 
     const handleWishlist = () => {
         if (!currentUser) return alert("Please login first");
@@ -89,19 +98,39 @@ const ProductDetails = () => {
         dispatch(toggleWishlistProduct(product._id));
     };
 
+    const handleDeleteReview = async (reviewId) => {
+        if (window.confirm("Are you sure you want to delete this Divine Review?")) {
+            try {
+                await dispatch(deleteReview({ productId: product._id, reviewId })).unwrap();
+            } catch (err) {
+                alert(err);
+            }
+        }
+    };
+
     const handleReviewSubmit = async (reviewData) => {
         const formData = new FormData();
         formData.append('rating', reviewData.rating);
         formData.append('comment', reviewData.comment);
-        if (reviewData.image) {
+        if (reviewData.image && typeof reviewData.image !== 'string') {
             formData.append('image', reviewData.image);
         }
 
         try {
-            await dispatch(addReview({ productId: product._id, reviewData: formData })).unwrap();
-            alert("Review submitted successfully!");
+            if (editingReview) {
+                await dispatch(updateReview({
+                    productId: product._id,
+                    reviewId: editingReview._id,
+                    reviewData: formData
+                })).unwrap();
+                setEditingReview(null);
+                alert("Review updated successfully!");
+            } else {
+                await dispatch(addReview({ productId: product._id, reviewData: formData })).unwrap();
+                alert("Review submitted successfully!");
+            }
         } catch (err) {
-            alert(err);
+            alert(err instanceof Error ? err.message : err);
         }
     };
 
@@ -268,9 +297,39 @@ const ProductDetails = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                {new Date(rev.date).toLocaleDateString()}
-                                            </span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                    {new Date(rev.date).toLocaleDateString()}
+                                                </span>
+                                                {/* Action Buttons */}
+                                                {currentUser && (
+                                                    <div className="flex gap-2">
+                                                        {(currentUser._id === rev.userId?._id || currentUser.id === rev.userId?._id) && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingReview(rev);
+                                                                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                                                }}
+                                                                className="text-gray-400 hover:text-royal-gold transition-colors"
+                                                                title="Edit Review"
+                                                            >
+                                                                <Edit2 size={14} />
+                                                            </button>
+                                                        )}
+                                                        {/* Delete: Author OR Admin/Manager/Owner */}
+                                                        {((currentUser._id === rev.userId?._id || currentUser.id === rev.userId?._id) ||
+                                                            ['admin', 'manager', 'owner'].includes(currentUser.role)) && (
+                                                                <button
+                                                                    onClick={() => handleDeleteReview(rev._id)}
+                                                                    className="text-gray-400 hover:text-red-600 transition-colors"
+                                                                    title="Delete Review"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="text-gray-600 text-sm leading-relaxed italic font-medium">
                                             "{rev.comment}"
@@ -293,7 +352,26 @@ const ProductDetails = () => {
 
                     <div className="lg:sticky lg:top-32 h-fit">
                         {user ? (
-                            <ReviewForm onSubmit={handleReviewSubmit} loading={reviewLoading} />
+                            <div className={`relative transition-all duration-300 ${editingReview ? 'ring-2 ring-royal-gold/50 rounded-3xl p-1' : ''}`}>
+                                {editingReview && (
+                                    <div className="flex justify-between items-center mb-4 px-2">
+                                        <span className="text-xs font-black uppercase text-royal-gold tracking-widest">Editing Review</span>
+                                        <button onClick={() => setEditingReview(null)} className="text-gray-400 hover:text-red-500 flex items-center gap-1 text-[10px] font-bold uppercase">
+                                            <X size={12} /> Cancel
+                                        </button>
+                                    </div>
+                                )}
+                                <ReviewForm
+                                    onSubmit={handleReviewSubmit}
+                                    loading={reviewLoading}
+                                    initialData={editingReview ? {
+                                        rating: editingReview.rating,
+                                        comment: editingReview.comment,
+                                        image: editingReview.image
+                                    } : null}
+                                    submitLabel={editingReview ? "Update Review" : "Submit Review"}
+                                />
+                            </div>
                         ) : (
                             <div className="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-premium space-y-6">
                                 <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center text-red-600 mx-auto">
