@@ -87,15 +87,23 @@ const ProductCard = ({ product }) => {
                         </span>
                     )}
                     {product.category && (
-                        <span className="px-3 py-1 glass-card text-royal-black text-[10px] font-black uppercase tracking-widest rounded-full">
-                            {typeof product.category === 'object' ? product.category.name : product.category}
-                        </span>
+                        (() => {
+                            const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
+                            if (categoryName?.toLowerCase().includes('handicraft')) return null;
+                            return (
+                                <span className="px-3 py-1 glass-card text-royal-black text-[10px] font-black uppercase tracking-widest rounded-full">
+                                    {categoryName}
+                                </span>
+                            );
+                        })()
                     )}
-                    {product.tags && product.tags.map(tag => (
-                        <span key={tag} className="px-3 py-1 bg-royal-black text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg opacity-90">
-                            {tag}
-                        </span>
-                    ))}
+                    {product.tags && product.tags
+                        .filter(tag => !tag.toLowerCase().includes('handicraft'))
+                        .map(tag => (
+                            <span key={tag} className="px-3 py-1 bg-royal-black text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg opacity-90">
+                                {tag}
+                            </span>
+                        ))}
                 </div>
 
                 {/* Favorite Button */}

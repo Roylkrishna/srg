@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Activity = require('../models/Activity');
+const Product = require('../models/Product');
 const bcrypt = require('bcryptjs');
 const cloudinary = require('cloudinary').v2;
 
@@ -133,12 +134,46 @@ exports.deleteUser = async (req, res, next) => {
         if (req.user.id === req.params.id) return next({ statusCode: 400, message: "You cannot delete your own account!" });
 
         const user = await User.findById(req.params.id);
-        if (user && user.profilePicture && user.profilePicture.includes('cloudinary')) {
-            try {
-                const publicId = user.profilePicture.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
-                await cloudinary.uploader.destroy(publicId);
-            } catch (err) {
-                console.error("Cloudinary Delete Error (Admin User Delete):", err);
+        if (user) {
+            // Delete profile picture
+            if (user.profilePicture && user.profilePicture.includes('cloudinary')) {
+                try {
+                    const publicId = user.profilePicture.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Cloudinary Delete Error (Admin User Delete):", err);
+                }
+            }
+
+            // Cleanup Reviews and Review Images
+            const productsWithReviews = await Product.find({ 'reviews.userId': user._id });
+
+            for (const product of productsWithReviews) {
+                const userReviews = product.reviews.filter(rev => rev.userId && rev.userId.toString() === user._id.toString());
+
+                for (const rev of userReviews) {
+                    if (rev.image && rev.image.includes('cloudinary')) {
+                        try {
+                            const publicId = rev.image.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                            await cloudinary.uploader.destroy(publicId);
+                        } catch (err) {
+                            console.error("Cloudinary Delete Error (Review cleanup on user delete):", err);
+                        }
+                    }
+                }
+
+                // Remove reviews from product
+                product.reviews = product.reviews.filter(rev => rev.userId && rev.userId.toString() !== user._id.toString());
+
+                // Recalculate Aggregates
+                product.numReviews = product.reviews.length;
+                if (product.numReviews > 0) {
+                    product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+                } else {
+                    product.rating = 0;
+                }
+
+                await product.save();
             }
         }
 
@@ -359,6 +394,37 @@ exports.deleteMe = async (req, res, next) => {
             } catch (cloudErr) {
                 console.error("Error deleting profile picture from Cloudinary:", cloudErr);
             }
+        }
+
+        // Cleanup Reviews and Review Images
+        const productsWithReviews = await Product.find({ 'reviews.userId': user._id });
+
+        for (const product of productsWithReviews) {
+            const userReviews = product.reviews.filter(rev => rev.userId && rev.userId.toString() === user._id.toString());
+
+            for (const rev of userReviews) {
+                if (rev.image && rev.image.includes('cloudinary')) {
+                    try {
+                        const publicId = rev.image.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                        await cloudinary.uploader.destroy(publicId);
+                    } catch (err) {
+                        console.error("Cloudinary Delete Error (Review cleanup on user delete):", err);
+                    }
+                }
+            }
+
+            // Remove reviews from product
+            product.reviews = product.reviews.filter(rev => rev.userId && rev.userId.toString() !== user._id.toString());
+
+            // Recalculate Aggregates
+            product.numReviews = product.reviews.length;
+            if (product.numReviews > 0) {
+                product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+            } else {
+                product.rating = 0;
+            }
+
+            await product.save();
         }
 
         await User.findByIdAndDelete(req.user.id);

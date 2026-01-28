@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Star, Camera, X, Loader2, Sparkles, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Star, Camera, X, Loader2, Sparkles, Send, Image as ImageIcon } from 'lucide-react';
 import { compressImage } from '../../lib/imageCompression';
 
 const ReviewForm = ({ onSubmit, loading, initialData, submitLabel = "Submit Review" }) => {
@@ -9,6 +9,9 @@ const ReviewForm = ({ onSubmit, loading, initialData, submitLabel = "Submit Revi
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
     const [compressionLoading, setCompressionLoading] = useState(false);
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const [cameraStream, setCameraStream] = useState(null);
+    const videoRef = useRef(null);
 
     // Pre-fill form if editing
     useEffect(() => {
@@ -39,6 +42,77 @@ const ReviewForm = ({ onSubmit, loading, initialData, submitLabel = "Submit Revi
             }
         }
     };
+
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            setCameraStream(stream);
+            setIsCameraActive(true);
+            // Wait for next tick to ensure videoRef is available
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            }, 100);
+        } catch (err) {
+            console.error("Camera access denied:", err);
+            alert("Could not access camera. Please check permissions.");
+        }
+    };
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            setCameraStream(null);
+        }
+        setIsCameraActive(false);
+    };
+
+    const capturePhoto = async () => {
+        if (!videoRef.current) return;
+
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        stopCamera();
+
+        canvas.toBlob(async (blob) => {
+            if (!blob) return;
+            const file = new File([blob], `review-capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            setCompressionLoading(true);
+            try {
+                const compressed = await compressImage(file, 150);
+                setImage(compressed);
+                setPreview(URL.createObjectURL(compressed));
+            } catch (err) {
+                console.error("Compression failed:", err);
+            } finally {
+                setCompressionLoading(false);
+            }
+        }, 'image/jpeg', 0.9);
+    };
+
+    // Auto-attach stream when camera active
+    useEffect(() => {
+        if (isCameraActive && cameraStream && videoRef.current) {
+            videoRef.current.srcObject = cameraStream;
+        }
+    }, [isCameraActive, cameraStream]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [cameraStream]);
 
     const clearImage = () => {
         setImage(null);
@@ -106,14 +180,55 @@ const ReviewForm = ({ onSubmit, loading, initialData, submitLabel = "Submit Revi
 
             {/* Image Upload */}
             <div className="space-y-4">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                     <label className="cursor-pointer group flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-lg active:scale-95">
-                        <Camera size={18} />
-                        {compressionLoading ? 'Processing...' : 'Add Photo'}
+                        <ImageIcon size={18} />
+                        {compressionLoading ? 'Processing...' : 'Upload'}
                         <input type="file" onChange={handleImageChange} className="hidden" accept="image/*" disabled={compressionLoading || loading} />
                     </label>
+
+                    <button
+                        type="button"
+                        onClick={startCamera}
+                        disabled={compressionLoading || loading}
+                        className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl font-bold text-sm hover:bg-red-700 transition-all shadow-lg active:scale-95"
+                    >
+                        <Camera size={18} />
+                        Take Photo
+                    </button>
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Max 150KB (Auto-compressed)</span>
                 </div>
+
+                {/* Camera View Overlay */}
+                {isCameraActive && (
+                    <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4">
+                        <div className="relative w-full max-w-lg aspect-square sm:aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl">
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-8">
+                                <button
+                                    type="button"
+                                    onClick={stopCamera}
+                                    className="p-4 bg-white/20 text-white rounded-full hover:bg-white/30 backdrop-blur transition-all"
+                                >
+                                    <X size={24} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={capturePhoto}
+                                    className="p-2 border-4 border-white rounded-full transition-transform active:scale-90"
+                                >
+                                    <div className="w-14 h-14 bg-white rounded-full"></div>
+                                </button>
+                            </div>
+                        </div>
+                        <p className="mt-4 text-white/60 text-xs font-bold uppercase tracking-widest">Capturing Divine Moment</p>
+                    </div>
+                )}
 
                 {preview && (
                     <div className="relative inline-block group">

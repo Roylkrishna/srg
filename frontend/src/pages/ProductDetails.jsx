@@ -99,7 +99,7 @@ const ProductDetails = () => {
     };
 
     const handleDeleteReview = async (reviewId) => {
-        if (window.confirm("Are you sure you want to delete this Divine Review?")) {
+        if (window.confirm("Are you sure you want to delete this Review?")) {
             try {
                 await dispatch(deleteReview({ productId: product._id, reviewId })).unwrap();
             } catch (err) {
@@ -178,9 +178,6 @@ const ProductDetails = () => {
                                         Rare Piece
                                     </span>
                                 )}
-                                <span className="px-3 py-1.5 md:px-5 md:py-2 glass-card text-royal-gold text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full">
-                                    Handcrafted
-                                </span>
                                 {product.tags && product.tags.map(tag => (
                                     <span key={tag} className="px-3 py-1.5 md:px-5 md:py-2 bg-royal-black text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] rounded-full shadow-2xl opacity-90">
                                         {tag}
@@ -220,7 +217,7 @@ const ProductDetails = () => {
                                             <Star key={i} size={14} className={i < (product.rating || 0) ? "fill-royal-gold" : "text-gray-200"} />
                                         ))}
                                     </div>
-                                    <span>{product.reviews?.length || 0} Royal Reviews</span>
+                                    <span>{product.reviews?.length || 0} Reviews</span>
                                 </div>
                                 <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">
                                     {product.name}
@@ -269,8 +266,7 @@ const ProductDetails = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 pt-16 border-t border-gray-100/50">
                     <div className="space-y-12">
                         <div className="space-y-4">
-                            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900">Divine Reviews</h2>
-                            <p className="text-gray-500 text-sm font-medium">Voices from our spiritual community.</p>
+                            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900">Reviews</h2>
                         </div>
 
                         {product.reviews && product.reviews.length > 0 ? (
@@ -345,7 +341,7 @@ const ProductDetails = () => {
                         ) : (
                             <div className="py-12 px-8 bg-white rounded-[2rem] border border-dashed border-gray-200 text-center space-y-4">
                                 <Star size={40} className="mx-auto text-gray-100" />
-                                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Be the first to leave a royal review</p>
+                                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Be the first to leave a review</p>
                             </div>
                         )}
                     </div>
@@ -379,7 +375,7 @@ const ProductDetails = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <h3 className="text-2xl font-serif font-bold text-gray-900">Join the Circle</h3>
-                                    <p className="text-gray-500 text-sm font-medium">Please login to share your divine experience with this piece.</p>
+                                    <p className="text-gray-500 text-sm font-medium">Please login to share your experience with this piece.</p>
                                 </div>
                                 <Link to="/login" className="block w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-100">
                                     Login to Review

@@ -138,7 +138,7 @@ const Navbar = () => {
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="text-sm font-bold text-gray-900 truncate group-hover:text-royal-red transition-colors">{product.name}</p>
-                                                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{product.category?.name || 'Handcrafted'}</p>
+                                                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{product.category?.name || ''}</p>
                                                             </div>
                                                             <div className="text-sm font-black text-gray-900">₹{product.price}</div>
                                                         </Link>
