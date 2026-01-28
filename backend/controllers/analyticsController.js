@@ -126,9 +126,8 @@ exports.getDashboardStats = async (req, res) => {
         const recentActivity = await Analytics.find(dateFilter)
             .sort({ timestamp: -1 })
             .limit(50)
-            .limit(50)
             .populate('userId', 'firstName lastName email')
-            .populate('productId', 'name image');
+            .populate('productId', 'name images');
 
         // 6. Totals
         const totalViews = viewsOverTime.reduce((acc, curr) => acc + curr.count, 0);

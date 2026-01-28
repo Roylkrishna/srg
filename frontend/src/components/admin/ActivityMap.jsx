@@ -45,8 +45,8 @@ const ActivityMap = ({ activityData }) => {
             className="h-[400px] w-full rounded-2xl z-0"
         >
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://openstreetmap.in/">OpenStreetMap India</a> contributors'
+                url="https://{s}.tile.openstreetmap.in/osm-in/{z}/{x}/{y}.png"
             />
             {validData.map((log, idx) => (
                 <Marker
@@ -57,7 +57,7 @@ const ActivityMap = ({ activityData }) => {
                         <div className="p-2 min-w-[200px]">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className={`p-1.5 rounded-full text-white text-xs ${log.eventType === 'VIEW_PRODUCT' ? 'bg-blue-500' :
-                                        log.eventType === 'SEARCH' ? 'bg-orange-500' : 'bg-gray-500'
+                                    log.eventType === 'SEARCH' ? 'bg-orange-500' : 'bg-gray-500'
                                     }`}>
                                     {log.eventType === 'VIEW_PRODUCT' ? <Package size={14} /> :
                                         log.eventType === 'SEARCH' ? <Search size={14} /> : <Activity size={14} />}

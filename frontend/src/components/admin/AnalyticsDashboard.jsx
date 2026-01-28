@@ -260,9 +260,9 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                         <ActivityMap activityData={data.recentActivity} />
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="max-h-[500px] overflow-y-auto custom-scrollbar border border-gray-100 rounded-xl">
                         <table className="w-full text-left border-collapse">
-                            <thead>
+                            <thead className="sticky top-0 z-10 bg-gray-50">
                                 <tr className="border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
                                     <th className="p-4">Time</th>
                                     <th className="p-4">User</th>
@@ -297,7 +297,7 @@ const AnalyticsDashboard = ({ data, loading, timeRange, onTimeRangeChange }) => 
                                         <td className="p-4 text-gray-600 max-w-xs truncate">
                                             {log.eventType === 'VIEW_PRODUCT' && log.productId ? (
                                                 <span className="flex items-center gap-2">
-                                                    <img src={log.productId.image} className="w-6 h-6 rounded object-contain bg-gray-100" />
+                                                    {log.productId.images?.[0] && <img src={log.productId.images[0]} className="w-6 h-6 rounded object-contain bg-gray-100" />}
                                                     {log.productId.name}
                                                 </span>
                                             ) : log.eventType === 'SEARCH' ? (
