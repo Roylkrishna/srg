@@ -6,7 +6,7 @@ import { registerUser } from '../redux/slices/authSlice';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
-        firstName: '', lastName: '', email: '', username: '', password: ''
+        firstName: '', lastName: '', email: '', username: '', password: '', confirmPassword: ''
     });
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch();
@@ -26,7 +26,19 @@ const Signup = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (loading) return;
-        dispatch(registerUser(formData));
+
+        if (formData.password.length < 6) {
+            alert("Password must be at least 6 characters long");
+            return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        const { confirmPassword, ...registerData } = formData;
+        dispatch(registerUser(registerData));
     };
 
 
@@ -102,6 +114,7 @@ const Signup = () => {
                                     required
                                     value={formData.password}
                                     onChange={handleChange}
+                                    minLength={6}
                                     className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gift-red focus:border-gift-red pr-12"
                                 />
                                 <button
@@ -112,6 +125,20 @@ const Signup = () => {
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                            <input
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                type="password"
+                                required
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                minLength={6}
+                                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-gift-red focus:border-gift-red"
+                            />
                         </div>
 
                         <button type="submit" disabled={loading} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50">

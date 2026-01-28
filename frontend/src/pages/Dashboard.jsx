@@ -132,6 +132,10 @@ const Dashboard = () => {
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
+        if (passwordForm.newPassword.length < 6) {
+            alert("New password must be at least 6 characters long!");
+            return;
+        }
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
             alert("New passwords do not match!");
             return;

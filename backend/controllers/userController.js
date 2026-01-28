@@ -111,6 +111,10 @@ exports.createUser = async (req, res, next) => {
     try {
         if (req.user.role !== 'owner') return next({ statusCode: 403, message: "Only owners can create users/managers!" });
 
+        if (!req.body.password || req.body.password.length < 6) {
+            return next({ statusCode: 400, message: "Password must be at least 6 characters long!" });
+        }
+
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const newUser = new User({
             ...req.body,
@@ -342,6 +346,10 @@ exports.adminResetPassword = async (req, res, next) => {
             return next({ statusCode: 400, message: "User ID and new password are required!" });
         }
 
+        if (newPassword.length < 6) {
+            return next({ statusCode: 400, message: "Password must be at least 6 characters long!" });
+        }
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         await User.findByIdAndUpdate(userId, { password: hashedPassword });
@@ -355,7 +363,16 @@ exports.adminResetPassword = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
     try {
         const { oldPassword, newPassword } = req.body;
-        const user = await User.findById(req.user.id);
+
+        if (!oldPassword || !newPassword) {
+            return next({ statusCode: 400, message: "Old and new passwords are required" });
+        }
+
+        if (newPassword.length < 6) {
+            return next({ statusCode: 400, message: "New password must be at least 6 characters long" });
+        }
+
+        const user = await User.findById(req.user.id).select('+password');
 
         if (!user) return next({ statusCode: 404, message: "User not found!" });
 

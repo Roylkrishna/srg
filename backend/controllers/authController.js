@@ -23,6 +23,10 @@ const generateSuggestions = async (username) => {
 exports.signup = async (req, res, next) => {
     const { firstName, lastName, username, email, password } = req.body;
 
+    if (!password || password.length < 6) {
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+    }
+
     try {
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
@@ -241,6 +245,10 @@ exports.resetPassword = async (req, res, next) => {
 
         if (!user) {
             return next({ statusCode: 400, message: "Invalid or expired OTP" });
+        }
+
+        if (newPassword.length < 6) {
+            return next({ statusCode: 400, message: "Password must be at least 6 characters long" });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);

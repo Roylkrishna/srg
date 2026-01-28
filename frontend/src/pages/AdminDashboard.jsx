@@ -145,6 +145,10 @@ const AdminDashboard = () => {
 
     const handleAddUser = (e) => {
         e.preventDefault();
+        if (!newUserForm.password || newUserForm.password.length < 6) {
+            alert("Password must be at least 6 characters long");
+            return;
+        }
         dispatch(createUser(newUserForm)).then(() => {
             setIsAddUserMode(false);
             setNewUserForm({ firstName: '', lastName: '', username: '', email: '', password: '', role: 'manager' });
@@ -230,6 +234,27 @@ const AdminDashboard = () => {
                 setCategorySearch('');
             } else {
                 alert("Failed: " + res.payload);
+            }
+        });
+    };
+
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        if (!resetNewPassword || resetNewPassword.length < 6) {
+            alert("Password must be at least 6 characters long.");
+            return;
+        }
+
+        dispatch(adminResetPassword({
+            userId: resetPasswordModal.userId,
+            newPassword: resetNewPassword
+        })).then((res) => {
+            if (!res.error) {
+                alert("Password reset successfully for " + resetPasswordModal.userName);
+                setResetPasswordModal({ isOpen: false, userId: null, userName: '' });
+                setResetNewPassword('');
+            } else {
+                alert("Failed to reset password: " + res.payload);
             }
         });
     };
@@ -827,7 +852,8 @@ const AdminDashboard = () => {
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-xs font-bold text-gray-600 uppercase">Initial Password</label>
-                                                <input placeholder="••••••••" type="password" value={newUserForm.password} onChange={e => setNewUserForm({ ...newUserForm, password: e.target.value })} className="border border-gray-200 p-2.5 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none transition-all" required />
+                                                <input placeholder="••••••••" type="password" value={newUserForm.password} onChange={e => setNewUserForm({ ...newUserForm, password: e.target.value })} className="border border-gray-200 p-2.5 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none transition-all" required minLength={6} />
+                                                <p className="text-[10px] text-gray-400">Must be at least 6 characters long.</p>
                                             </div>
                                             <div className="flex justify-end gap-3 pt-4">
                                                 <button type="button" onClick={() => setIsAddUserMode(false)} className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
