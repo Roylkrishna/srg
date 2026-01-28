@@ -129,6 +129,11 @@ const AdminDashboard = () => {
             formData.append('tags', newProduct.tags);
         }
 
+        // Append images
+        imageFiles.forEach(file => {
+            formData.append('images', file);
+        });
+
         dispatch(createProduct(formData)).then(() => {
             setIsAddMode(false);
             setNewProduct({ name: '', price: '', purchasedPrice: '', category: '', description: '', quantityAvailable: 10, images: [], tags: '' });

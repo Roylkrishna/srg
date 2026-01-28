@@ -57,9 +57,8 @@ exports.deleteBanner = async (req, res) => {
         const banner = await Banner.findById(req.params.id);
         if (!banner) return res.status(404).json({ success: false, message: 'Banner not found' });
 
-        // Extract public_id from Cloudinary URL if needed for deletion, 
-        // but often we just delete the record. If we want to delete from Cloudinary:
-        const publicId = banner.imageUrl.split('/').pop().split('.')[0];
+        // Extract public_id from Cloudinary URL (handles folders)
+        const publicId = banner.imageUrl.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
         await cloudinary.uploader.destroy(publicId);
 
         await Banner.findByIdAndDelete(req.params.id);
