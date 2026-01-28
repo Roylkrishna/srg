@@ -153,34 +153,42 @@ exports.getDashboardStats = async (req, res) => {
 // @access  Private (Owner)
 exports.getActivityLogs = async (req, res) => {
     try {
-        const { page = 1, limit = 20, userId, action, startDate, endDate } = req.query;
+        const { page = 1, limit = 20, userId, eventType, startDate, endDate } = req.query;
         const query = {};
 
         if (userId) query.userId = userId;
-        if (action) query.action = action;
+        if (eventType && eventType !== 'all') query.eventType = eventType;
 
         if (startDate || endDate) {
             query.timestamp = {};
             if (startDate) query.timestamp.$gte = new Date(startDate);
-            if (endDate) query.timestamp.$lte = new Date(endDate);
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                query.timestamp.$lte = end;
+            }
         }
 
-        const logs = await Activity.find(query)
+        const logs = await Analytics.find(query)
             .populate('userId', 'firstName lastName email profilePicture')
+            .populate('productId', 'name images')
             .sort({ timestamp: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
-        const count = await Activity.countDocuments(query);
+        const count = await Analytics.countDocuments(query);
 
         res.status(200).json({
+            success: true,
             logs,
-            totalPages: Math.ceil(count / limit),
-            currentPage: Number(page),
-            totalLogs: count
+            pagination: {
+                totalPages: Math.ceil(count / limit),
+                page: Number(page),
+                totalLogs: count
+            }
         });
     } catch (error) {
         console.error('Error fetching activity logs:', error);
-        res.status(500).json({ message: 'Error fetching activity logs' });
+        res.status(500).json({ success: false, message: 'Error fetching activity logs' });
     }
 };

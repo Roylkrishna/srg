@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Filter, Calendar, ChevronLeft, ChevronRight, User, MousePointer, Terminal, Download, RefreshCw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axios from 'axios';
+import api from '../lib/api';
 
 const ActivityLog = () => {
     const { user } = useSelector((state) => state.auth);
@@ -36,33 +36,22 @@ const ActivityLog = () => {
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
             const config = {
-                headers: { Authorization: `Bearer ${token}` },
                 params: {
                     page: pagination.page,
                     limit: pagination.limit,
                     eventType: filters.eventType,
                     startDate: filters.startDate,
                     endDate: filters.endDate,
-                    // specific userId or generic search if needed, currently backend supports exact userId match
-                    // We will pass userId if we have a robust way to select it, or implement search on backend
-                    // For now, let's assume if the admin types an ID it filters, or we can add search param later
-                    // If the backend only supports userId exact match, we need a user picker. 
-                    // Let's rely on eventType and Date for now mostly, and maybe userId if provided manually.
                     userId: filters.userId
                 }
             };
 
-            // Using the base URL from environment or hardcoded as per project structure
-            // Assuming proxy or set URL. In other files it seems like redux thunks are used.
-            // But we can use direct axios here for simplicity or create a thunk.
-            // Since this is a new page, direct axios is fine for now.
-            const response = await axios.get('http://localhost:5000/api/analytics/logs', config);
+            const response = await api.get('/analytics/logs', config);
 
             if (response.data.success) {
                 setLogs(response.data.logs);
-                setPagination(prev => ({ ...prev, ...response.data.pagination }));
+                setPagination(response.data.pagination);
             }
         } catch (error) {
             console.error("Error fetching logs:", error);
@@ -112,7 +101,7 @@ const ActivityLog = () => {
             {/* Top Navbar mimic or simple header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10 px-4 sm:px-8 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Link to="/admin-dashboard?tab=analytics" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
+                    <Link to="/admin-secure-access-7x24?tab=analytics" className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
                         <ArrowLeft size={24} />
                     </Link>
                     <h1 className="text-xl font-bold text-gray-900">User Activity Logs</h1>
@@ -196,9 +185,9 @@ const ActivityLog = () => {
 
                     {/* Table Section */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto overflow-y-auto max-h-[600px]">
                             <table className="w-full text-left">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-20">
                                     <tr>
                                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Timestamp</th>
                                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
@@ -250,8 +239,8 @@ const ActivityLog = () => {
                                                             {getEventIcon(log.eventType)}
                                                         </div>
                                                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${log.eventType === 'VIEW_PRODUCT' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                                log.eventType === 'SEARCH' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                                                    'bg-gray-50 text-gray-700 border-gray-200'
+                                                            log.eventType === 'SEARCH' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                                'bg-gray-50 text-gray-700 border-gray-200'
                                                             }`}>
                                                             {log.eventType}
                                                         </span>
@@ -260,7 +249,7 @@ const ActivityLog = () => {
                                                 <td className="px-6 py-4 text-sm text-gray-600">
                                                     {log.productId ? (
                                                         <div className="flex items-center gap-2">
-                                                            {log.productId.image && <img src={log.productId.image} alt="" className="h-8 w-8 rounded object-cover border border-gray-100" />}
+                                                            {log.productId.images?.[0] && <img src={log.productId.images[0]} alt="" className="h-8 w-8 rounded object-cover border border-gray-100" />}
                                                             <span className="truncate max-w-[200px]" title={log.productId.name}>{log.productId.name}</span>
                                                         </div>
                                                     ) : log.metadata?.query ? (

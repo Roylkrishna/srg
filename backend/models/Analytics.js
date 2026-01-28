@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const AnalyticsSchema = new mongoose.Schema({
     eventType: {
         type: String,
-        enum: ['VIEW_PRODUCT', 'SEARCH', 'PAGE_VIEW', 'ADD_TO_CART'],
+        enum: ['VIEW_PRODUCT', 'SEARCH', 'PAGE_VIEW', 'ADD_TO_CART', 'LOGIN'],
         required: true
     },
     userId: {
