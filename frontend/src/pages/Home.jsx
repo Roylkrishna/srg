@@ -19,7 +19,7 @@ const Home = () => {
     const { categories } = useSelector((state) => state.categories);
 
     useEffect(() => {
-        dispatch(fetchProducts({ select: '_id,name,price,description,image,images,rating,reviews,isNew,category,tags' }));
+        dispatch(fetchProducts({ select: '_id,name,price,description,image,images,rating,numReviews,reviews,isNew,category,tags' }));
         dispatch(fetchBanners());
         dispatch(fetchAllCategories());
     }, [dispatch]);

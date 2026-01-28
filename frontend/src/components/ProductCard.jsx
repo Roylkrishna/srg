@@ -151,9 +151,9 @@ const ProductCard = ({ product }) => {
                         ))}
                     </div>
                     <span className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest hidden sm:inline">
-                        {product.numReviews || 0} Reviews
+                        {product.reviews?.length || product.numReviews || 0} Reviews
                     </span>
-                    <span className="text-[9px] text-gray-400 font-bold sm:hidden">({product.numReviews || 0})</span>
+                    <span className="text-[9px] text-gray-400 font-bold sm:hidden">({product.reviews?.length || product.numReviews || 0})</span>
                 </div>
 
                 <Link to={`/product/${product._id}`}>
