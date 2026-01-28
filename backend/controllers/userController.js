@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Activity = require('../models/Activity');
 const bcrypt = require('bcryptjs');
+const cloudinary = require('cloudinary').v2;
 
 exports.updateProfile = async (req, res, next) => {
     if (req.user.id !== req.params.id) return next({ statusCode: 401, message: "You can only update your own account!" });
@@ -25,6 +26,16 @@ exports.updateProfile = async (req, res, next) => {
 
         // Handle File Upload (Cloudinary)
         if (req.file) {
+            // Delete old profile picture
+            const user = await User.findById(req.params.id);
+            if (user && user.profilePicture && user.profilePicture.includes('cloudinary')) {
+                try {
+                    const publicId = user.profilePicture.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Cloudinary Delete Error (Profile Update):", err);
+                }
+            }
             updateData.$set.profilePicture = req.file.path;
         }
 
@@ -120,6 +131,16 @@ exports.deleteUser = async (req, res, next) => {
 
         // Safeguard: Cannot delete self
         if (req.user.id === req.params.id) return next({ statusCode: 400, message: "You cannot delete your own account!" });
+
+        const user = await User.findById(req.params.id);
+        if (user && user.profilePicture && user.profilePicture.includes('cloudinary')) {
+            try {
+                const publicId = user.profilePicture.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                await cloudinary.uploader.destroy(publicId);
+            } catch (err) {
+                console.error("Cloudinary Delete Error (Admin User Delete):", err);
+            }
+        }
 
         await User.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: "User deleted successfully" });
@@ -312,6 +333,37 @@ exports.changePassword = async (req, res, next) => {
         await user.save();
 
         res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteMe = async (req, res, next) => {
+    try {
+        const { password } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) return next({ statusCode: 404, message: "User not found!" });
+
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return next({ statusCode: 400, message: "Incorrect password! Account deletion aborted." });
+        }
+
+        // Delete profile picture from Cloudinary if it exists
+        if (user.profilePicture && user.profilePicture.includes('cloudinary')) {
+            try {
+                const publicId = user.profilePicture.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudErr) {
+                console.error("Error deleting profile picture from Cloudinary:", cloudErr);
+            }
+        }
+
+        await User.findByIdAndDelete(req.user.id);
+
+        res.status(200).json({ success: true, message: "Your account has been permanently deleted." });
     } catch (error) {
         next(error);
     }

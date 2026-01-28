@@ -41,6 +41,15 @@ exports.updateBanner = async (req, res) => {
 
         const updatedData = { ...req.body };
         if (req.file) {
+            // Delete old image
+            if (banner.imageUrl) {
+                try {
+                    const publicId = banner.imageUrl.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Cloudinary Delete Error (Banner Update):", err);
+                }
+            }
             updatedData.imageUrl = req.file.path;
         }
 

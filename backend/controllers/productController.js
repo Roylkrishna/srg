@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Activity = require('../models/Activity');
 const Sale = require('../models/Sale');
+const cloudinary = require('cloudinary').v2;
 
 exports.createProduct = async (req, res, next) => {
     try {
@@ -57,7 +58,25 @@ exports.updateProduct = async (req, res, next) => {
             updateData.tags = req.body.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag !== '');
         }
 
-        // Handle Images: Combine existing (kept) images and new uploads
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
+        // Handle Images Removal from Cloudinary
+        if (req.body.existingImages || (req.files && req.files.length > 0)) {
+            const keptImages = Array.isArray(req.body.existingImages) ? req.body.existingImages : (req.body.existingImages ? [req.body.existingImages] : []);
+            const removedImages = product.images.filter(img => !keptImages.includes(img));
+
+            for (const imgUrl of removedImages) {
+                try {
+                    const publicId = imgUrl.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Cloudinary Delete Error (Update):", err);
+                }
+            }
+        }
+
+        // Combine existing (kept) images and new uploads
         let currentImages = [];
         if (req.body.existingImages) {
             if (Array.isArray(req.body.existingImages)) {
@@ -72,8 +91,6 @@ exports.updateProduct = async (req, res, next) => {
             newImages = req.files.map(file => file.path);
         }
 
-        // Only update 'images' field if meaningful data exists to update 
-        // (This allows partial updates that don't touch images to succeed without clearing them)
         if (req.body.existingImages || (req.files && req.files.length > 0)) {
             updateData.images = [...currentImages, ...newImages];
         }
@@ -101,6 +118,19 @@ exports.updateProduct = async (req, res, next) => {
 
 exports.deleteProduct = async (req, res, next) => {
     try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
+        // Delete all associated images from Cloudinary
+        for (const imgUrl of product.images) {
+            try {
+                const publicId = imgUrl.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                await cloudinary.uploader.destroy(publicId);
+            } catch (err) {
+                console.error("Cloudinary Delete Error (Product):", err);
+            }
+        }
+
         await Product.findByIdAndDelete(req.params.id);
         res.status(200).json("Product has been deleted...");
     } catch (error) {
@@ -321,6 +351,7 @@ exports.deleteReview = async (req, res, next) => {
         }
 
         // Remove the review
+        const reviewImage = review.image;
         product.reviews.pull(reviewId);
 
         // Standard: Recalculate Aggregates
@@ -330,6 +361,16 @@ exports.deleteReview = async (req, res, next) => {
             : 0;
 
         await product.save();
+
+        // Delete review image from Cloudinary if it exists
+        if (reviewImage) {
+            try {
+                const publicId = reviewImage.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                await cloudinary.uploader.destroy(publicId);
+            } catch (err) {
+                console.error("Cloudinary Delete Error (Review):", err);
+            }
+        }
 
         // Return fully populated product for UI update
         const updatedProduct = await Product.findById(id)
@@ -361,7 +402,21 @@ exports.updateReview = async (req, res, next) => {
         // Update fields
         if (rating) review.rating = Number(rating);
         if (comment) review.comment = comment;
-        if (req.file) review.image = req.file.path; // Update image if provided
+
+        // If new image is uploaded, clean up the old one
+        if (req.file) {
+            const oldImage = review.image;
+            review.image = req.file.path;
+
+            if (oldImage) {
+                try {
+                    const publicId = oldImage.split('upload/')[1].split('.').slice(0, -1).join('.').split('/').slice(1).join('/');
+                    await cloudinary.uploader.destroy(publicId);
+                } catch (err) {
+                    console.error("Cloudinary Delete Error (Review Update):", err);
+                }
+            }
+        }
 
         // Recalculate Aggregates (Rating might change)
         product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;

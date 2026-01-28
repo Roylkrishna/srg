@@ -140,6 +140,15 @@ export const changePassword = createAsyncThunk('user/changePassword', async ({ o
     }
 });
 
+export const deleteAccount = createAsyncThunk('user/deleteAccount', async (password, thunkAPI) => {
+    try {
+        const response = await api.post('/users/me/delete-account', { password });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+});
+
 const userSlice = createSlice({
     name: 'user',
     initialState: {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import ProductCard from '../components/ProductCard';
-import { User, Package, Heart, LogOut, Camera, Mail, Phone, MapPin, Calendar, Edit3, Clock, ExternalLink, Search, Key } from 'lucide-react';
+import { User, Package, Heart, LogOut, Camera, Mail, Phone, MapPin, Calendar, Edit3, Clock, ExternalLink, Search, Key, ShieldAlert, AlertTriangle, X } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateUserProfile, fetchManagerActivity, changePassword } from '../redux/slices/userSlice';
+import { updateUserProfile, fetchManagerActivity, changePassword, deleteAccount } from '../redux/slices/userSlice';
 import { logoutUser } from '../redux/slices/authSlice';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -35,6 +35,12 @@ const Dashboard = () => {
         oldPassword: '',
         newPassword: '',
         confirmPassword: ''
+    });
+
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        password: '',
+        loading: false
     });
 
     const fileInputRef = React.useRef(null);
@@ -142,6 +148,22 @@ const Dashboard = () => {
     const handleLogout = () => {
         dispatch(logoutUser());
         navigate('/');
+    };
+
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        if (!deleteModal.password) return;
+
+        setDeleteModal({ ...deleteModal, loading: true });
+        try {
+            await dispatch(deleteAccount(deleteModal.password)).unwrap();
+            alert("Your account has been deleted. We're sorry to see you go.");
+            dispatch(logoutUser());
+            navigate('/');
+        } catch (error) {
+            alert(error);
+            setDeleteModal({ ...deleteModal, loading: false, password: '' });
+        }
     };
 
     return (
@@ -475,12 +497,89 @@ const Dashboard = () => {
                                             Update Password
                                         </button>
                                     </form>
+
+                                    <div className="mt-12 pt-12 border-t border-gray-100">
+                                        <div className="flex items-center gap-3 text-red-600 mb-4">
+                                            <ShieldAlert size={20} />
+                                            <h3 className="font-bold">Danger Zone</h3>
+                                        </div>
+                                        <div className="bg-red-50 p-6 rounded-2xl border border-red-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                            <div>
+                                                <p className="font-bold text-red-900 text-sm">Delete Account Permanently</p>
+                                                <p className="text-xs text-red-600/70">Once deleted, your profile, wishlist, and settings are gone forever.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setDeleteModal({ ...deleteModal, isOpen: true })}
+                                                className="px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-xl hover:bg-red-700 transition-all shadow-md shadow-red-200 whitespace-nowrap"
+                                            >
+                                                Delete My Account
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
+
+            {/* Account Deletion Modal */}
+            {deleteModal.isOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden"
+                    >
+                        <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-red-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-red-100 text-red-600 rounded-xl">
+                                    <AlertTriangle size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-serif font-bold text-gray-900">Final Confirmation</h3>
+                                    <p className="text-xs text-gray-500 font-medium tracking-tight">This action is irreversible</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setDeleteModal({ ...deleteModal, isOpen: false, password: '' })} className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-white rounded-full"><X /></button>
+                        </div>
+                        <form onSubmit={handleDeleteAccount} className="p-8 space-y-6">
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                                    Are you absolutely sure? Deleting your account will remove your <span className="text-gray-900 font-bold">wishlist, profile preferences, and all personal data</span>.
+                                </p>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Enter Password to Confirm</label>
+                                    <input
+                                        type="password"
+                                        placeholder="Your current password"
+                                        value={deleteModal.password}
+                                        onChange={e => setDeleteModal({ ...deleteModal, password: e.target.value })}
+                                        className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all font-medium"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    type="submit"
+                                    disabled={deleteModal.loading || !deleteModal.password}
+                                    className="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-xl shadow-red-100 disabled:opacity-50 active:scale-95"
+                                >
+                                    {deleteModal.loading ? 'Deleting Account...' : 'Yes, Delete My Account'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteModal({ ...deleteModal, isOpen: false, password: '' })}
+                                    className="w-full py-3 text-gray-500 font-bold hover:text-gray-900 transition-colors"
+                                >
+                                    No, Keep My Account
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
