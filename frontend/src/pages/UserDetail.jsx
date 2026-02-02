@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Calendar, Mail, Phone, MapPin, Package, Clock,
-    ArrowLeft, Trash2, Ban, CheckCircle, Info, ExternalLink, Filter, Search
+    ArrowLeft, Trash2, Ban, CheckCircle, Info, ExternalLink, Filter, Search, Key, X as XIcon
 } from 'lucide-react';
-import { fetchUserWithOrders, deleteUser, toggleUserStatus, clearUserDetails, fetchManagerActivity } from '../redux/slices/userSlice';
+import { fetchUserWithOrders, deleteUser, toggleUserStatus, clearUserDetails, fetchManagerActivity, adminResetPassword } from '../redux/slices/userSlice';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
 
@@ -20,6 +20,10 @@ const UserDetail = () => {
         startDate: format(new Date(new Date().setDate(new Date().getDate() - 30)), 'yyyy-MM-dd'),
         endDate: format(new Date(), 'yyyy-MM-dd')
     });
+
+    // Password Reset State
+    const [resetPasswordModal, setResetPasswordModal] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
 
     useEffect(() => {
         dispatch(fetchUserWithOrders(id));
@@ -47,6 +51,27 @@ const UserDetail = () => {
         dispatch(toggleUserStatus(id));
     };
 
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        if (!newPassword || newPassword.length < 6) {
+            alert("Password must be at least 6 characters long.");
+            return;
+        }
+
+        dispatch(adminResetPassword({
+            userId: id,
+            newPassword: newPassword
+        })).then((res) => {
+            if (!res.error) {
+                alert("Password reset successfully!");
+                setResetPasswordModal(false);
+                setNewPassword('');
+            } else {
+                alert("Failed to reset password: " + res.payload);
+            }
+        });
+    };
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setDateFilter(prev => ({ ...prev, [name]: value }));
@@ -69,7 +94,46 @@ const UserDetail = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+        <div className="min-h-screen bg-gray-50 pt-24 pb-12 relative">
+            {/* Password Reset Modal */}
+            {resetPasswordModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in-up">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-red-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
+                                    <Key size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>
+                                    <p className="text-xs text-gray-500">For user: <span className="font-bold">{userData.firstName} {userData.lastName}</span></p>
+                                </div>
+                            </div>
+                            <button onClick={() => setResetPasswordModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><XIcon /></button>
+                        </div>
+                        <form onSubmit={handleResetPassword} className="p-6 space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-600 uppercase">New Password</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter new password"
+                                    value={newPassword}
+                                    onChange={e => setNewPassword(e.target.value)}
+                                    className="border border-gray-200 p-3 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none transition-all font-mono"
+                                    required
+                                    minLength={6}
+                                />
+                                <p className="text-[10px] text-gray-400">Must be at least 6 characters long.</p>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-4">
+                                <button type="button" onClick={() => setResetPasswordModal(false)} className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                                <button type="submit" className="bg-red-600 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-200 active:scale-95 transition-all">Reset Password</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -151,25 +215,33 @@ const UserDetail = () => {
                         {loggedInUser?.role === 'owner' && (
                             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
                                 <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6">Administrative Actions</h3>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-3">
                                     <button
-                                        onClick={handleToggleStatus}
-                                        className={cn(
-                                            "flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all",
-                                            userData.isActive
-                                                ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
-                                                : "bg-green-50 text-green-600 hover:bg-green-100"
-                                        )}
+                                        onClick={() => setResetPasswordModal(true)}
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 font-bold text-sm transition-all border border-transparent hover:border-gray-200"
                                     >
-                                        {userData.isActive ? <Ban size={18} /> : <CheckCircle size={18} />}
-                                        {userData.isActive ? 'Disable' : 'Enable'}
+                                        <Key size={18} /> Reset Password
                                     </button>
-                                    <button
-                                        onClick={handleDelete}
-                                        className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm transition-all"
-                                    >
-                                        <Trash2 size={18} /> Remove
-                                    </button>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button
+                                            onClick={handleToggleStatus}
+                                            className={cn(
+                                                "flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all",
+                                                userData.isActive
+                                                    ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
+                                                    : "bg-green-50 text-green-600 hover:bg-green-100"
+                                            )}
+                                        >
+                                            {userData.isActive ? <Ban size={18} /> : <CheckCircle size={18} />}
+                                            {userData.isActive ? 'Disable' : 'Enable'}
+                                        </button>
+                                        <button
+                                            onClick={handleDelete}
+                                            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm transition-all"
+                                        >
+                                            <Trash2 size={18} /> Remove
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
